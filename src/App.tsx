@@ -2,14 +2,18 @@ import { Outlet } from "react-router";
 
 function App(){
   return(
-    <div className="dark flex min-h-screen w-full items-center justify-center overflow-y-auto bg-neutral-950 text-white">
-        <p
-          className="absolute left-6 top-6 z-10 text-lg font-semibold tracking-[0.35em] uppercase text-white"
-          aria-label="Xenon home"
-        >
-          Xenon
-        </p>
-        <Outlet />
+    <div className="dark flex flex-col min-h-screen w-full bg-neutral-950 text-white">
+        <nav className="w-full p-6">
+          <p
+            className="text-lg font-semibold tracking-[0.35em] uppercase text-white"
+            aria-label="Xenon home"
+          >
+            Xenon
+          </p>
+        </nav>
+        <main className="flex flex-1 items-center justify-center overflow-y-auto w-full">
+          <Outlet />
+        </main>
     </div>
   )
 }

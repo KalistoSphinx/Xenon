@@ -1,9 +1,11 @@
 import { Outlet } from "react-router";
 import { Toaster } from "sonner";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 function App(){
   return(
-    <div className="dark flex flex-col min-h-screen w-full bg-neutral-950 text-white">
+    <TooltipProvider>
+      <div className="flex flex-col min-h-screen w-full bg-neutral-950 text-white">
         <nav className="w-full p-6">
           <p
             className="text-lg font-semibold tracking-[0.35em] uppercase text-white"
@@ -17,6 +19,7 @@ function App(){
         </main>
         <Toaster />
     </div>
+    </TooltipProvider>
   )
 }
 

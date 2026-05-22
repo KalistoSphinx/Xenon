@@ -24,5 +24,5 @@ export function ProtectedRoute() {
     return <Navigate to="/" replace />;
   }
 
-  return <Outlet />;
+  return <Outlet />
 }

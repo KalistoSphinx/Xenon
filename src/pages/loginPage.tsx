@@ -8,10 +8,13 @@ import {
   FieldError
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
 
 const formSchema = z.object({
   email: z.email("Invalid Email Address"),
@@ -22,6 +25,9 @@ export function LoginPage({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+
+  const [loading, setLoading] = useState(false)
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -30,8 +36,27 @@ export function LoginPage({
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+  async function onSubmit(formData: z.infer<typeof formSchema>) {
+    try {
+      setLoading(true)
+
+      const {error} = await authClient.signIn.email({
+        email: formData.email,
+        password: formData.password
+      })
+
+      if(error){
+        toast.warning(`${error.message}`, {position: "top-center"})
+        return
+      }
+
+      return <Navigate to="/dashboard" replace/>
+
+    } catch (error) {
+      toast.warning(`${error}`, {position: "top-center"})
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -85,7 +110,13 @@ export function LoginPage({
             )}
           />
           <Field>
-            <Button type="submit">Login</Button>
+            <Button type="submit">
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                "Login"
+              )}
+            </Button>
             <FieldDescription className="text-center">
               Don&apos;t have an account?{" "}
               <Link to="signup" className="underline underline-offset-4">

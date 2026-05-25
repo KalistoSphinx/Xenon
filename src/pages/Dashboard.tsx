@@ -13,8 +13,13 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useSearchParams } from "react-router"
 
 export default function Page() {
+  const [searchParams] = useSearchParams();
+  const filter = searchParams.get("page")
+  const title = filter!.charAt(0).toUpperCase() + filter!.slice(1);
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -35,7 +40,7 @@ export default function Page() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                  <BreadcrumbPage>{title}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

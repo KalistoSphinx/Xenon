@@ -1,5 +1,5 @@
 export function StarredNotes(){
-    return (
+    return(
         <div>Starred</div>
     )
 }

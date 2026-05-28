@@ -48,6 +48,7 @@ export default function Page() {
             </Breadcrumb>
           </div>
         </header>
+        <Separator />
         <Outlet />
       </SidebarInset>
     </SidebarProvider>

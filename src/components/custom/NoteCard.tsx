@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardAction,
@@ -10,9 +11,18 @@ import {
 import { Separator } from "../ui/separator";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {Ellipsis} from "@hugeicons/core-free-icons";
-import {StarIcon} from "lucide-react"
+import {StarIcon, Pencil, Trash2} from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "../ui/dropdown-menu";
 
 export function NoteCard() {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <Card size="sm" className="group transition-all duration-200 ease-in-out hover:-translate-y-0.5">
       <CardContent className="flex justify-between -mb-2">
@@ -20,11 +30,24 @@ export function NoteCard() {
             <span className="size-1.5 rounded-full bg-amber-600" />
             <p className="text-xs">Research</p>
         </div>
-        <CardAction className="flex items-center gap-2 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        <CardAction  className={`flex items-center gap-2 text-muted-foreground transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
             <StarIcon size={14} strokeWidth={2} className="pointer transition-all duration-200 hover:scale-120"></StarIcon>
-            <span className="p-1">
-              <HugeiconsIcon size={18} icon={Ellipsis} strokeWidth={2} />
-            </span>
+            <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+              <DropdownMenuTrigger render={<span className="p-1 aria-expanded:bg-muted rounded-sm cursor-pointer" />}>
+                <HugeiconsIcon size={18} icon={Ellipsis} strokeWidth={2} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-32">
+                <DropdownMenuItem>
+                  <Pencil size={14} />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive">
+                  <Trash2 size={14} />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
         </CardAction>
       </CardContent>
       <CardHeader>

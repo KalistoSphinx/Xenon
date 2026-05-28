@@ -26,7 +26,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { authClient } from "@/lib/auth-client";
 
-import {EllipsisVertical, Icon} from "lucide-react"
+import {EllipsisVertical} from "lucide-react"
 
 export function NavUser({
   user,

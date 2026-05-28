@@ -13,12 +13,14 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { useSearchParams } from "react-router"
+import { Outlet, useLocation } from "react-router"
 
 export default function Page() {
-  const [searchParams] = useSearchParams();
-  const filter = searchParams.get("page")
-  const title = filter!.charAt(0).toUpperCase() + filter!.slice(1);
+  
+  const location = useLocation()
+  const path = location.pathname
+  const name = path.split("/").pop()
+  const title = name?.charAt(0).toUpperCase() + name!.slice(1)
 
   return (
     <SidebarProvider>
@@ -39,21 +41,14 @@ export default function Page() {
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
+                <BreadcrumbItem>  
                   <BreadcrumbPage>{title}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-          </div>
-          <div className="min-h-screen flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-        </div>
+        <Outlet />
       </SidebarInset>
     </SidebarProvider>
   )

@@ -13,6 +13,9 @@ import { SignUpPage } from "./pages/signUpPage.tsx";
 import { ProtectedRoute } from "./routes/protectedRoute.tsx";
 import HomePage from "./pages/Dashboard.tsx";
 import { UnauthorizedRoute } from "./routes/UnauthorizedRoute.tsx";
+import { AllNotes } from "./pages/Notes.tsx";
+import { StarredNotes } from "./pages/Starred.tsx";
+import { TrashNotes } from "./pages/Trash.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -25,7 +28,11 @@ const router = createBrowserRouter(
       </Route>
 
       <Route element={<ProtectedRoute />}>
-        <Route path="dashboard" element={<HomePage />} />
+        <Route path="dashboard" element={<HomePage />}>
+          <Route path="notes" element={<AllNotes />} />
+          <Route path="starred" element={<StarredNotes />} />
+          <Route path="trash" element={<TrashNotes />} />
+        </Route>
       </Route>
     </>,
   ),

@@ -17,6 +17,7 @@ import { UnauthorizedRoute } from "./routes/UnauthorizedRoute.tsx";
 import { AllNotes } from "./pages/notes/Notes.tsx";
 import { StarredNotes } from "./pages/notes/Starred.tsx";
 import { TrashNotes } from "./pages/notes/Trash.tsx";
+import { EditorPage } from "./pages/EditorPage.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -42,6 +43,7 @@ const router = createBrowserRouter(
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    {/* <RouterProvider router={router} /> */}
+    <EditorPage />
   </StrictMode>,
 );

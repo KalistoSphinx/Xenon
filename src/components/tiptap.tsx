@@ -17,11 +17,14 @@ const Tiptap = () => {
 
   return (
     <>
-      <Input
-        className={"text-[46px] font-bold outline-none "}
+      <textarea
+
+        rows={1}
+        className={"text-[46px] font-bold outline-none resize-none field-sizing-content"}
         name="title"
         placeholder="Title"
-      ></Input>
+        
+      ></textarea>
       <MenuBar editor={editor} />
       <EditorContent
         className="

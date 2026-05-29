@@ -2,7 +2,9 @@ import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { menuBarStateSelector } from "./MenuBarState.ts";
 import { Toggle } from "./ui/toggle.tsx";
-import { BoldIcon, Italic } from "lucide-react";
+import { BoldIcon, Italic, Redo2, Undo2 } from "lucide-react";
+import { Button } from "@/components/ui/button.tsx";
+import { Separator } from "./ui/separator.tsx";
 
 export const MenuBar = ({ editor }: { editor: Editor }) => {
   const editorState = useEditorState({
@@ -18,7 +20,16 @@ export const MenuBar = ({ editor }: { editor: Editor }) => {
     "rounded-lg p-2 hover:bg-transparent aria-pressed:text-violet-300 aria-pressed:bg-violet-500/40";
 
   return (
-    <div className="flex gap-1 top-2 z-100 bg-muted sticky p-2 rounded-xl w-fit border border-border">
+    <div className="flex gap-1 items-center top-2 z-100 bg-muted sticky p-2 rounded-xl w-fit border border-border">
+        <div className="flex items-center">
+          <Button size={"icon"} variant={"ghost"} onClick={() => editor.chain().focus().undo().run()} disabled={!editorState.canUndo}>
+        <Undo2></Undo2>
+      </Button>
+      <Button size={"icon"} variant={"ghost"} onClick={() => editor.chain().focus().redo().run()} disabled={!editorState.canRedo}>
+        <Redo2></Redo2>
+      </Button>
+        </div>
+      <Separator orientation="vertical" className={"mr-1.5"} />
       <Toggle
         size={"sm"}
         className={customStyle}

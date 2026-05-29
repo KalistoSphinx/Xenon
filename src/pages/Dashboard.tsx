@@ -13,10 +13,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Outlet, useLocation } from "react-router"
 import {HugeiconsIcon} from "@hugeicons/react"
 import {LeftToRightListBulletIcon, WindowsNewIcon} from "@hugeicons/core-free-icons"
+import { useState } from "react"
 
 export default function Page() {
   
@@ -24,6 +25,7 @@ export default function Page() {
   const path = location.pathname
   const name = path.split("/").pop()
   const title = name?.charAt(0).toUpperCase() + name!.slice(1)
+  const [viewType, setViewType] = useState("cards")
 
   return (
     <SidebarProvider>
@@ -51,7 +53,7 @@ export default function Page() {
             </Breadcrumb>
           </div>
           <div className="pr-4">
-            <Tabs defaultValue="cards" >
+            <Tabs defaultValue="cards" value={viewType} onValueChange={(val) => setViewType(val)}>
               <TabsList className="rounded-2xl">
                 <TabsTrigger value="cards">
                   <HugeiconsIcon icon={WindowsNewIcon} /> 
@@ -61,12 +63,14 @@ export default function Page() {
                   <HugeiconsIcon icon={LeftToRightListBulletIcon} /> 
                   {/* <span className="text-xs">List</span> */}
                 </TabsTrigger>
+                <TabsContent value="cards"></TabsContent>
+                <TabsContent value="list"></TabsContent>
               </TabsList>
             </Tabs>
           </div>
         </header>
         <Separator />
-        <Outlet />
+        <Outlet context={viewType} />
       </SidebarInset>
     </SidebarProvider>
   )

@@ -2,7 +2,7 @@ import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { menuBarStateSelector } from "./MenuBarState.ts";
 import { Toggle } from "./ui/toggle.tsx";
-import { BoldIcon, Italic, Redo2, Undo2 } from "lucide-react";
+import { BoldIcon, Italic, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "./ui/separator.tsx";
 
@@ -47,6 +47,15 @@ export const MenuBar = ({ editor }: { editor: Editor }) => {
         aria-label="Toggle Bold"
       >
         <Italic strokeWidth={2} />
+      </Toggle>
+      <Toggle
+        size={"sm"}
+        className={customStyle}
+        pressed={editorState.isUnderline}
+        onPressedChange={() => editor!.chain().focus().toggleUnderline().run()}
+        aria-label="Toggle Bold"
+      >
+        <UnderlineIcon strokeWidth={2} />
       </Toggle>
     </div>
   );

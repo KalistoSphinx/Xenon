@@ -2,7 +2,6 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
 import { MenuBar } from "./MenuBar";
-import { Input } from "@base-ui/react";
 
 const Tiptap = () => {
   const editor = useEditor({

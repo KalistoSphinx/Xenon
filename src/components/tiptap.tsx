@@ -1,12 +1,19 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
+import {Highlight} from "@tiptap/extension-highlight"
 import { MenuBar } from "./MenuBar";
 
 const Tiptap = () => {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Highlight.configure({
+        multicolor: true,
+        HTMLAttributes: {
+          class: "p-1 rounded-[0.4rem] px-[0.3rem] py-[0.1rem]"
+        }
+      }),
       Placeholder.configure({
         placeholder: "Start typing here...",
       }),

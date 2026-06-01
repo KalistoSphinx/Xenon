@@ -6,6 +6,7 @@ import { Heading } from "@tiptap/extension-heading";
 import { MenuBar } from "./MenuBar";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import { all, createLowlight } from "lowlight";
+import TextAlign from '@tiptap/extension-text-align'
 
 const Tiptap = () => {
   const editor = useEditor({
@@ -30,6 +31,9 @@ const Tiptap = () => {
       Placeholder.configure({
         placeholder: "Start typing here...",
       }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph']
+      })
     ],
     content: "",
   });

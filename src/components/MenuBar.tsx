@@ -2,7 +2,7 @@ import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { menuBarStateSelector } from "./MenuBarState.ts";
 import { Toggle } from "./ui/toggle.tsx";
-import { BoldIcon, Code2Icon, Heading1, Heading2,HighlighterIcon, Italic, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, BoldIcon, Code2Icon, Heading1, Heading2,HighlighterIcon, Italic, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "./ui/separator.tsx";
 
@@ -103,6 +103,32 @@ export const MenuBar = ({ editor }: { editor: Editor }) => {
       >
         <Heading2 strokeWidth={2} />
       </Toggle>
+      <Separator orientation="vertical" className={"ml-1"} />
+      <div className="flex items-center">
+        <Button
+          size={"icon"}
+          variant={"ghost"}
+          onClick={() => editor.chain().focus().toggleTextAlign('left').run()}
+        >
+          <AlignLeft></AlignLeft>
+        </Button>
+        <Button
+          size={"icon"}
+          variant={"ghost"}
+          onClick={() => editor.chain().focus().toggleTextAlign("center").run()}
+        >
+          <AlignCenter />
+        </Button>
+        <Button
+          size={"icon"}
+          variant={"ghost"}
+          onClick={() => editor.chain().focus().toggleTextAlign("right").run()}
+        >
+          <AlignRight />
+        </Button>
+      </div>
+      <Separator orientation="vertical" className={"mr-1.5"} />
     </div>
+    
   );
 };

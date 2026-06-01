@@ -8,6 +8,9 @@ export function menuBarStateSelector(ctx: EditorStateSnapshot<Editor>) {
     isUnderline: ctx.editor.isActive("underline") ?? false,
     isHighlight: ctx.editor.isActive("highlight") ?? false,
     isCodeBlock: ctx.editor.isActive("codeBlock") ?? false,
+    isHeading1: ctx.editor.isActive("heading", {level: 1}) ?? false,
+    isHeading2: ctx.editor.isActive("heading", {level: 2}) ?? false,
+    isHeading3: ctx.editor.isActive("heading", {level: 3}) ?? false,
     canUndo: ctx.editor.can().chain().undo().run() ?? false,
     canRedo: ctx.editor.can().chain().redo().run() ?? false,
   };

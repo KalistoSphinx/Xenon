@@ -1,29 +1,31 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
-import {Highlight} from "@tiptap/extension-highlight"
+import { Highlight } from "@tiptap/extension-highlight";
+import { Heading } from "@tiptap/extension-heading";
 import { MenuBar } from "./MenuBar";
-import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight"
-import { all, createLowlight } from 'lowlight'
+import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
+import { all, createLowlight } from "lowlight";
 
 const Tiptap = () => {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        codeBlock: false,
+      StarterKit,
+      Heading.configure({
+        levels: [1, 2],
       }),
       CodeBlockLowlight.configure({
         lowlight: createLowlight(all),
         enableTabIndentation: true,
         HTMLAttributes: {
-          class: "rounded-lg bg-muted py-[0.75rem] px-[1rem] text-sm my-[1rem]"
-        }
+          class: "rounded-lg bg-muted py-[0.75rem] px-[1rem] text-sm my-[1rem]",
+        },
       }),
       Highlight.configure({
         multicolor: true,
         HTMLAttributes: {
-          class: "p-1 rounded-[0.4rem] px-[0.3rem] py-[0.1rem]"
-        }
+          class: "p-1 rounded-[0.4rem] px-[0.3rem] py-[0.1rem]",
+        },
       }),
       Placeholder.configure({
         placeholder: "Start typing here...",
@@ -35,12 +37,12 @@ const Tiptap = () => {
   return (
     <>
       <textarea
-
         rows={1}
-        className={"text-[32px] font-bold outline-none resize-none field-sizing-content"}
+        className={
+          "text-[32px] font-bold outline-none resize-none field-sizing-content"
+        }
         name="title"
         placeholder="Title"
-        
       ></textarea>
       <MenuBar editor={editor} />
       <EditorContent

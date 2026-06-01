@@ -2,7 +2,7 @@ import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { menuBarStateSelector } from "./MenuBarState.ts";
 import { Toggle } from "./ui/toggle.tsx";
-import { BoldIcon, Code2Icon, HighlighterIcon, Italic, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
+import { BoldIcon, Code2Icon, Heading1, Heading2,HighlighterIcon, Italic, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "./ui/separator.tsx";
 
@@ -84,6 +84,24 @@ export const MenuBar = ({ editor }: { editor: Editor }) => {
         aria-label="Toggle Code"
       >
         <Code2Icon strokeWidth={2} />
+      </Toggle>
+      <Toggle
+        size={"sm"}
+        className={customStyle}
+        pressed={editorState.isHeading1}
+        onPressedChange={() => editor!.chain().focus().toggleHeading({level: 1}).run()}
+        aria-label="Toggle Heading 1"
+      >
+        <Heading1 strokeWidth={2} />
+      </Toggle>
+      <Toggle
+        size={"sm"}
+        className={customStyle}
+        pressed={editorState.isHeading2}
+        onPressedChange={() => editor!.chain().focus().toggleHeading({level: 2}).run()}
+        aria-label="Toggle Heading 2"
+      >
+        <Heading2 strokeWidth={2} />
       </Toggle>
     </div>
   );

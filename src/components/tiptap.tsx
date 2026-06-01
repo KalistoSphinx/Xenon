@@ -3,11 +3,22 @@ import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
 import {Highlight} from "@tiptap/extension-highlight"
 import { MenuBar } from "./MenuBar";
+import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight"
+import { all, createLowlight } from 'lowlight'
 
 const Tiptap = () => {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      CodeBlockLowlight.configure({
+        lowlight: createLowlight(all),
+        enableTabIndentation: true,
+        HTMLAttributes: {
+          class: "rounded-lg bg-muted py-[0.75rem] px-[1rem] text-sm my-[1rem]"
+        }
+      }),
       Highlight.configure({
         multicolor: true,
         HTMLAttributes: {
@@ -26,7 +37,7 @@ const Tiptap = () => {
       <textarea
 
         rows={1}
-        className={"text-[46px] font-bold outline-none resize-none field-sizing-content"}
+        className={"text-[32px] font-bold outline-none resize-none field-sizing-content"}
         name="title"
         placeholder="Title"
         

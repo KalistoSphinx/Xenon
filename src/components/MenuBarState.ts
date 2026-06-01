@@ -7,6 +7,7 @@ export function menuBarStateSelector(ctx: EditorStateSnapshot<Editor>) {
     isItalic: ctx.editor.isActive("italic") ?? false,
     isUnderline: ctx.editor.isActive("underline") ?? false,
     isHighlight: ctx.editor.isActive("highlight") ?? false,
+    isCodeBlock: ctx.editor.isActive("codeBlock") ?? false,
     canUndo: ctx.editor.can().chain().undo().run() ?? false,
     canRedo: ctx.editor.can().chain().redo().run() ?? false,
   };

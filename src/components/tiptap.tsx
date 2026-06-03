@@ -11,6 +11,7 @@ import { Highlight } from "@tiptap/extension-highlight";
 import { Heading } from "@tiptap/extension-heading";
 import { MenuBar } from "./MenuBar";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { all, createLowlight } from "lowlight";
 import TextAlign from "@tiptap/extension-text-align";
 import {
@@ -35,6 +36,7 @@ const Tiptap = () => {
     extensions: [
       Document,
       StarterKit,
+      HorizontalRule,
       BulletList,
       OrderedList,
       TaskList,
@@ -95,16 +97,20 @@ function TaskItemView(props: NodeViewProps) {
     <NodeViewWrapper className="ml-2 flex items-center gap-2">
       <div contentEditable={false} className="my-2">
         <Checkbox
-        className={"rounded-sm dark:bg-muted dark:text-primary dark:data-checked:border-violet-600 dark:data-checked:bg-violet-600"}
-        checked={props.node.attrs.checked}
-        onCheckedChange={(checked) => {
-          props.updateAttributes({
-            checked: !!checked,
-          });
-        }}
-      />
+          className={
+            "rounded-sm dark:bg-muted dark:text-primary dark:data-checked:border-violet-600 dark:data-checked:bg-violet-600"
+          }
+          checked={props.node.attrs.checked}
+          onCheckedChange={(checked) => {
+            props.updateAttributes({
+              checked: !!checked,
+            });
+          }}
+        />
       </div>
-      <NodeViewContent className={`ml-0.5 flex-1 ${props.node.attrs.checked ? "line-through text-muted-foreground" : ""}`} />
+      <NodeViewContent
+        className={`ml-0.5 flex-1 ${props.node.attrs.checked ? "line-through text-muted-foreground" : ""}`}
+      />
     </NodeViewWrapper>
   );
 }

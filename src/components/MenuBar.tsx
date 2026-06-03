@@ -2,7 +2,7 @@ import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { menuBarStateSelector } from "./MenuBarState.ts";
 import { Toggle } from "./ui/toggle.tsx";
-import { AlignCenter, AlignLeft, AlignRight, BoldIcon, Code2Icon, Heading1, Heading2,HighlighterIcon, Italic, List, ListOrdered, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, BoldIcon, Code2Icon, Heading1, Heading2,HighlighterIcon, Italic, List, ListOrdered, ListTodo, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "./ui/separator.tsx";
 
@@ -17,7 +17,7 @@ export const MenuBar = ({ editor }: { editor: Editor }) => {
   }
 
   const customStyle =
-    "rounded-lg p-2 hover:bg-transparent aria-pressed:text-violet-300 aria-pressed:bg-violet-500/40";
+    "rounded-lg p-2 hover:bg-transparent aria-pressed:bg-violet-600/70";
 
   return (
     <div className="flex flex-wrap gap-1 items-center top-2 z-100 bg-muted sticky p-2 rounded-xl w-fit max-w-full border border-border">
@@ -120,6 +120,15 @@ export const MenuBar = ({ editor }: { editor: Editor }) => {
         aria-label="Toggle Ordered List"
       >
         <ListOrdered strokeWidth={2} />
+      </Toggle>
+      <Toggle
+        size={"sm"}
+        className={customStyle}
+        pressed={editorState.isTaskList}
+        onPressedChange={() => editor!.chain().focus().toggleTaskList().run()}
+        aria-label="Toggle Task List"
+      >
+        <ListTodo strokeWidth={2} />
       </Toggle>
       <Separator orientation="vertical" className={"ml-1"} />
       <div className="flex items-center">

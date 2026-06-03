@@ -13,6 +13,7 @@ export function menuBarStateSelector(ctx: EditorStateSnapshot<Editor>) {
     isHeading3: ctx.editor.isActive("heading", {level: 3}) ?? false,
     isBulletList: ctx.editor.isActive("bulletList") ?? false,
     isOrderedList: ctx.editor.isActive("orderedList") ?? false,
+    isTaskList: ctx.editor.isActive("taskList") ?? false,
     canUndo: ctx.editor.can().chain().undo().run() ?? false,
     canRedo: ctx.editor.can().chain().redo().run() ?? false,
   };

@@ -1,4 +1,10 @@
-import { useEditor, EditorContent } from "@tiptap/react";
+import {
+  useEditor,
+  EditorContent,
+  NodeViewWrapper,
+  NodeViewContent,
+  type NodeViewProps,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
 import { Highlight } from "@tiptap/extension-highlight";
@@ -6,15 +12,35 @@ import { Heading } from "@tiptap/extension-heading";
 import { MenuBar } from "./MenuBar";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import { all, createLowlight } from "lowlight";
-import TextAlign from '@tiptap/extension-text-align'
-import { BulletList, OrderedList } from "@tiptap/extension-list";
+import TextAlign from "@tiptap/extension-text-align";
+import {
+  BulletList,
+  OrderedList,
+  TaskItem,
+  TaskList,
+} from "@tiptap/extension-list";
+import Document from "@tiptap/extension-document";
+import { Checkbox } from "./ui/checkbox";
+
+import { ReactNodeViewRenderer } from "@tiptap/react";
+
+const CustomTaskItem = TaskItem.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(TaskItemView);
+  },
+});
 
 const Tiptap = () => {
   const editor = useEditor({
     extensions: [
+      Document,
       StarterKit,
       BulletList,
       OrderedList,
+      TaskList,
+      CustomTaskItem.configure({
+        nested: true,
+      }),
       Heading.configure({
         levels: [1, 2],
       }),
@@ -35,8 +61,8 @@ const Tiptap = () => {
         placeholder: "Start typing here...",
       }),
       TextAlign.configure({
-        types: ['heading', 'paragraph']
-      })
+        types: ["heading", "paragraph"],
+      }),
     ],
     content: "",
   });
@@ -64,5 +90,24 @@ const Tiptap = () => {
     </>
   );
 };
+
+function TaskItemView(props: NodeViewProps) {
+  return (
+    <NodeViewWrapper className="flex items-center gap-2">
+      <div contentEditable={false} className="my-2">
+        <Checkbox
+        className={"rounded-sm dark:bg-muted dark:text-primary dark:data-checked:border-violet-600 dark:data-checked:bg-violet-600"}
+        checked={props.node.attrs.checked}
+        onCheckedChange={(checked) => {
+          props.updateAttributes({
+            checked: !!checked,
+          });
+        }}
+      />
+      </div>
+      <NodeViewContent className={`ml-0.5 flex-1 ${props.node.attrs.checked ? "line-through text-muted-foreground" : ""}`} />
+    </NodeViewWrapper>
+  );
+}
 
 export default Tiptap;

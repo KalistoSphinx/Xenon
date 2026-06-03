@@ -80,7 +80,6 @@ const Tiptap = () => {
       <MenuBar editor={editor} />
       <EditorContent
         className="
-        text-lg
     [&_.ProseMirror]:outline-none
   "
         editor={editor}
@@ -93,7 +92,7 @@ const Tiptap = () => {
 
 function TaskItemView(props: NodeViewProps) {
   return (
-    <NodeViewWrapper className="flex items-center gap-2">
+    <NodeViewWrapper className="ml-2 flex items-center gap-2">
       <div contentEditable={false} className="my-2">
         <Checkbox
         className={"rounded-sm dark:bg-muted dark:text-primary dark:data-checked:border-violet-600 dark:data-checked:bg-violet-600"}

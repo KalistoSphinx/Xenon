@@ -7,11 +7,14 @@ import { MenuBar } from "./MenuBar";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import { all, createLowlight } from "lowlight";
 import TextAlign from '@tiptap/extension-text-align'
+import { BulletList, OrderedList } from "@tiptap/extension-list";
 
 const Tiptap = () => {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      BulletList,
+      OrderedList,
       Heading.configure({
         levels: [1, 2],
       }),
@@ -43,7 +46,7 @@ const Tiptap = () => {
       <textarea
         rows={1}
         className={
-          "text-[32px] font-bold outline-none resize-none field-sizing-content"
+          "text-[38px] font-bold outline-none resize-none field-sizing-content"
         }
         name="title"
         placeholder="Title"

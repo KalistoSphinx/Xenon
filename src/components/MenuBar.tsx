@@ -2,7 +2,7 @@ import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { menuBarStateSelector } from "./MenuBarState.ts";
 import { Toggle } from "./ui/toggle.tsx";
-import { AlignCenter, AlignLeft, AlignRight, BoldIcon, Code2Icon, Heading1, Heading2,HighlighterIcon, Italic, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, BoldIcon, Code2Icon, Heading1, Heading2,HighlighterIcon, Italic, List, ListOrdered, Redo2, UnderlineIcon, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "./ui/separator.tsx";
 
@@ -102,6 +102,24 @@ export const MenuBar = ({ editor }: { editor: Editor }) => {
         aria-label="Toggle Heading 2"
       >
         <Heading2 strokeWidth={2} />
+      </Toggle>
+      <Toggle
+        size={"sm"}
+        className={customStyle}
+        pressed={editorState.isBulletList}
+        onPressedChange={() => editor!.chain().focus().toggleBulletList().run()}
+        aria-label="Toggle Bullet List"
+      >
+        <List strokeWidth={2} />
+      </Toggle>
+      <Toggle
+        size={"sm"}
+        className={customStyle}
+        pressed={editorState.isOrderedList}
+        onPressedChange={() => editor!.chain().focus().toggleOrderedList().run()}
+        aria-label="Toggle Ordered List"
+      >
+        <ListOrdered strokeWidth={2} />
       </Toggle>
       <Separator orientation="vertical" className={"ml-1"} />
       <div className="flex items-center">

@@ -14,6 +14,7 @@ export function menuBarStateSelector(ctx: EditorStateSnapshot<Editor>) {
     isBulletList: ctx.editor.isActive("bulletList") ?? false,
     isOrderedList: ctx.editor.isActive("orderedList") ?? false,
     isTaskList: ctx.editor.isActive("taskList") ?? false,
+    isBlockquote: ctx.editor.isActive("blockquote") ?? false,
     canUndo: ctx.editor.can().chain().undo().run() ?? false,
     canRedo: ctx.editor.can().chain().redo().run() ?? false,
   };

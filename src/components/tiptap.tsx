@@ -14,6 +14,7 @@ import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { all, createLowlight } from "lowlight";
 import TextAlign from "@tiptap/extension-text-align";
+import Blockquote from "@tiptap/extension-blockquote";
 import {
   BulletList,
   OrderedList,
@@ -24,6 +25,7 @@ import Document from "@tiptap/extension-document";
 import { Checkbox } from "./ui/checkbox";
 
 import { ReactNodeViewRenderer } from "@tiptap/react";
+import { Plus } from "lucide-react";
 
 const CustomTaskItem = TaskItem.extend({
   addNodeView() {
@@ -36,6 +38,7 @@ const Tiptap = () => {
     extensions: [
       Document,
       StarterKit,
+      Blockquote,
       HorizontalRule,
       BulletList,
       OrderedList,
@@ -71,6 +74,8 @@ const Tiptap = () => {
 
   return (
     <>
+      <div className="group">
+        <Plus size={18} className="mb-2 transition-opacity duration-200 ease-in-out opacity-0 text-muted-foreground group-hover:opacity-100 " strokeWidth={2} />
       <textarea
         rows={1}
         className={
@@ -79,6 +84,7 @@ const Tiptap = () => {
         name="title"
         placeholder="Title"
       ></textarea>
+      </div>
       <MenuBar editor={editor} />
       <EditorContent
         className="

@@ -240,4 +240,11 @@ h2 {
       border-top: 1px solid var(--muted-foreground);
     }
   }
+
+  blockquote {
+    font-style: italic;
+    border-left: 3px solid var(--color-neutral-600);
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+  }
 }

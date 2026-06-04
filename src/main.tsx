@@ -7,6 +7,7 @@ import {
   createRoutesFromElements,
   Navigate,
   Route,
+  // @ts-ignore
   RouterProvider,
 } from "react-router";
 import { LoginPage } from "./pages/auth/loginPage.tsx";
@@ -18,7 +19,9 @@ import { AllNotes } from "./pages/notes/Notes.tsx";
 import { StarredNotes } from "./pages/notes/Starred.tsx";
 import { TrashNotes } from "./pages/notes/Trash.tsx";
 import { EditorPage } from "./pages/EditorPage.tsx";
+import { TooltipProvider } from "./components/ui/tooltip.tsx";
 
+// @ts-ignore
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -44,6 +47,6 @@ const router = createBrowserRouter(
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     {/* <RouterProvider router={router} /> */}
-    <EditorPage />
+    <TooltipProvider delay={600}><EditorPage /></TooltipProvider>
   </StrictMode>,
 );

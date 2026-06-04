@@ -26,6 +26,9 @@ import { Checkbox } from "./ui/checkbox";
 
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { Plus } from "lucide-react";
+import { Popover, PopoverContent, PopoverHeader, PopoverDescription, PopoverTrigger } from "./ui/popover";
+import { Badge } from "./ui/badge";
+import { useState } from "react";
 
 const CustomTaskItem = TaskItem.extend({
   addNodeView() {
@@ -75,7 +78,26 @@ const Tiptap = () => {
   return (
     <>
       <div className="group">
-        <Plus size={18} className="mb-2 transition-opacity duration-200 ease-in-out opacity-0 text-muted-foreground group-hover:opacity-100 " strokeWidth={2} />
+        <Popover>
+          <PopoverTrigger render={
+            <Plus size={18} className="mb-2 outline-none transition-opacity duration-200 ease-in-out opacity-0 text-muted-foreground group-hover:opacity-100 " strokeWidth={2} />
+          } />
+          <PopoverContent align="start" className={" border border-border"}>
+            <PopoverHeader>
+              <PopoverDescription>Your Workspaces</PopoverDescription>
+            </PopoverHeader>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant={"outline"} className="cursor-pointer flex gap-1.5">
+              <span className="size-1.5 rounded-full bg-amber-600" />
+              Personal
+            </Badge>
+            <Badge variant={"outline"} className="cursor-pointer flex gap-1.5">
+              <span className="size-1.5 rounded-full bg-green-400" />
+              Work
+            </Badge>
+            </div>
+          </PopoverContent>
+        </Popover>
       <textarea
         rows={1}
         className={

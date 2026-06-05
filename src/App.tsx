@@ -1,10 +1,8 @@
 import { Outlet } from "react-router";
 import { Toaster } from "sonner";
-import { TooltipProvider } from "./components/ui/tooltip";
 
 function App(){
   return(
-    <TooltipProvider>
       <div className="flex flex-col min-h-screen w-full bg-neutral-950 text-white">
         <nav className="w-full p-6">
           <p
@@ -19,7 +17,6 @@ function App(){
         </main>
         <Toaster />
     </div>
-    </TooltipProvider>
   )
 }
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
+import { NavWorkspaces } from "@/components/nav-workspaces";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -130,21 +130,16 @@ const data = {
       icon: <HugeiconsIcon icon={SentIcon} strokeWidth={2} />,
     },
   ],
-  projects: [
+  workspaces: [
     {
-      name: "Design Engineering",
+      name: "Personal",
       url: "#",
-      icon: <HugeiconsIcon icon={CropIcon} strokeWidth={2} />,
+      color: "#ffffff",
     },
     {
-      name: "Sales & Marketing",
+      name: "Work",
       url: "#",
-      icon: <HugeiconsIcon icon={PieChartIcon} strokeWidth={2} />,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: <HugeiconsIcon icon={MapsIcon} strokeWidth={2} />,
+      color: "#f012gh",
     },
   ],
 };
@@ -176,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain/>
-        <NavProjects projects={data.projects} />
+        <NavWorkspaces workspaces={data.workspaces} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

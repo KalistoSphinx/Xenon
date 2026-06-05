@@ -19,7 +19,7 @@ import {HugeiconsIcon} from "@hugeicons/react"
 import {LeftToRightListBulletIcon, WindowsNewIcon} from "@hugeicons/core-free-icons"
 import { useState } from "react"
 
-export default function Page() {
+export default function HomePage() {
   
   const location = useLocation()
   const path = location.pathname

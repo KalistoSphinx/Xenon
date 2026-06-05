@@ -21,7 +21,7 @@ export const MenuBar = ({ editor }: { editor: Editor }) => {
     "rounded-lg p-2 hover:bg-transparent aria-pressed:bg-violet-600/70";
 
   return (
-    <div className=" flex w-fit gap-1 items-center top-2 z-10 bg-muted sticky p-2 rounded-xl border border-border">
+    <div className=" flex max-sm:flex-wrap w-fit gap-1 items-center top-2 z-10 bg-muted sticky p-2 rounded-xl border border-border">
       <div className="flex items-center">
         <Tooltip>
           <TooltipTrigger

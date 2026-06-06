@@ -54,8 +54,10 @@ export function NavWorkspaces({
   const [workspaceColor, setWorkspaceColor] = useState("");
   const [nameError, setNameError] = useState("");
   const [open, setOpen] = useState(false)
+  const [isLoading, setLoading] = useState(false)
 
   const handleCreate = async () => {
+
     const name = workspaceName.trim();
 
     if(!name){
@@ -63,20 +65,22 @@ export function NavWorkspaces({
       return
     }
 
-    setNameError("");
+    setNameError("")
 
     try {
+
+      setLoading(true)
+
       await api.post("/workspaces", {
         name: name,
         color: workspaceColor
       })
 
       setOpen(false)
-      console.log("Hello");
-      
-
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -126,7 +130,11 @@ export function NavWorkspaces({
                 </Field>
               </div>
               <Button size="sm" className="w-full" onClick={handleCreate}>
-                Create
+                {isLoading ? 
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  : 
+                "Create"
+              }
               </Button>
             </div>
           </PopoverContent>

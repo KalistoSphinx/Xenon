@@ -20,9 +20,8 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   MoreHorizontalCircle01Icon,
-  FolderIcon,
-  Share03Icon,
   Delete02Icon,
+  Edit03Icon,
 } from "@hugeicons/core-free-icons";
 import { Plus } from "lucide-react";
 import {
@@ -53,36 +52,34 @@ export function NavWorkspaces({
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceColor, setWorkspaceColor] = useState("");
   const [nameError, setNameError] = useState("");
-  const [open, setOpen] = useState(false)
-  const [isLoading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   const handleCreate = async () => {
-
     const name = workspaceName.trim();
 
-    if(!name){
+    if (!name) {
       setNameError("Name is required");
-      return
+      return;
     }
 
-    setNameError("")
+    setNameError("");
 
     try {
-
-      setLoading(true)
+      setLoading(true);
 
       await api.post("/workspaces", {
         name: name,
-        color: workspaceColor
-      })
+        color: workspaceColor,
+      });
 
-      setOpen(false)
+      setOpen(false);
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <SidebarGroup className="group">
@@ -115,26 +112,29 @@ export function NavWorkspaces({
                     onChange={(e) => setWorkspaceColor(e.target.value)}
                   />
                 </div>
-                <Field data-invalid={!!nameError} className="flex flex-col flex-1 gap-1.5">
+                <Field
+                  data-invalid={!!nameError}
+                  className="flex flex-col flex-1 gap-1.5"
+                >
                   <Input
-                  type="text"
-                  placeholder="Workspace name"
-                  aria-invalid={!!nameError}
-                  className="h-8"
-                  onChange={(e) => {
-                    setWorkspaceName(e.target.value)
-                    if(nameError) setNameError("");
-                  }}
-                />
-                {nameError && (<FieldError>{nameError}</FieldError>)}
+                    type="text"
+                    placeholder="Workspace name"
+                    aria-invalid={!!nameError}
+                    className="h-8"
+                    onChange={(e) => {
+                      setWorkspaceName(e.target.value);
+                      if (nameError) setNameError("");
+                    }}
+                  />
+                  {nameError && <FieldError>{nameError}</FieldError>}
                 </Field>
               </div>
               <Button size="sm" className="w-full" onClick={handleCreate}>
-                {isLoading ? 
-                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                  : 
-                "Create"
-              }
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  "Create"
+                )}
               </Button>
             </div>
           </PopoverContent>
@@ -167,26 +167,17 @@ export function NavWorkspaces({
                 />
                 <span className="sr-only">More</span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48"
+              <DropdownMenuContent className={"min-w-32"}
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem>
                   <HugeiconsIcon
-                    icon={FolderIcon}
+                    icon={Edit03Icon}
                     strokeWidth={2}
                     className="text-muted-foreground"
                   />
-                  <span>View Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <HugeiconsIcon
-                    icon={Share03Icon}
-                    strokeWidth={2}
-                    className="text-muted-foreground"
-                  />
-                  <span>Share Project</span>
+                  <span>Edit</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive">
@@ -195,7 +186,7 @@ export function NavWorkspaces({
                     strokeWidth={2}
                     className="text-muted-foreground"
                   />
-                  <span>Delete Project</span>
+                  <span>Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -34,6 +34,8 @@ import {
   PopoverTrigger,
 } from "./ui/popover";
 import { Badge } from "./ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 const CustomTaskItem = TaskItem.extend({
   addNodeView() {
@@ -80,9 +82,18 @@ const Tiptap = () => {
     content: "",
   });
 
+  const { data: workspaces = [] } = useQuery({
+    queryKey: ["workspaces"],
+    queryFn: async () => {
+      const res = await api.get("/workspaces");
+      return res.data;
+    },
+    enabled: false,
+  });
+
   return (
     <>
-      <div className="group">
+      <div className="group min-w-0">
         <Popover>
           <PopoverTrigger
             render={
@@ -98,27 +109,28 @@ const Tiptap = () => {
               <PopoverDescription>Your Workspaces</PopoverDescription>
             </PopoverHeader>
             <div className="flex flex-wrap gap-2">
-              <Badge
-                variant={"outline"}
-                className="cursor-pointer flex gap-1.5"
-              >
-                <span className="size-1.5 rounded-full bg-amber-600" />
-                Personal
-              </Badge>
-              <Badge
-                variant={"outline"}
-                className="cursor-pointer flex gap-1.5"
-              >
-                <span className="size-1.5 rounded-full bg-green-400" />
-                Work
-              </Badge>
+              {workspaces.map((workspace : {
+                id: string,
+                name: string, 
+                color: string
+              }) => (
+                <Badge
+                  variant={"outline"}
+                  className="cursor-pointer flex gap-1.5"
+                >
+                  <span className="size-1.5 rounded-full" style={{
+                    backgroundColor: workspace.color
+                  }} />
+                  {workspace.name}
+                </Badge>
+              ))}
             </div>
           </PopoverContent>
         </Popover>
         <textarea
           rows={1}
           className={
-            "text-[38px] font-bold outline-none resize-none field-sizing-content"
+            "w-full max-w-full resize-none overflow-hidden wrap-break-word text-[38px] font-bold outline-none field-sizing-content"
           }
           name="title"
           placeholder="Title"
@@ -127,7 +139,13 @@ const Tiptap = () => {
       <MenuBar editor={editor} />
       <EditorContent
         className="
+    w-full min-w-0 max-w-full
+    [&_.ProseMirror]:min-h-60
+    [&_.ProseMirror]:max-w-full
+    [&_.ProseMirror]:wrap-break-word
+    [&_.ProseMirror]:whitespace-pre-wrap
     [&_.ProseMirror]:outline-none
+    [&_.ProseMirror_*]:max-w-full
   "
         editor={editor}
       />

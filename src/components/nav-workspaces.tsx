@@ -37,25 +37,63 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { Field, FieldError } from "./ui/field";
 import { api } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function NavWorkspaces({
   workspaces,
 }: {
   workspaces: {
+    id: string;
     name: string;
-    url: string;
     color: string;
   }[];
 }) {
   const { isMobile } = useSidebar();
 
   const [workspaceName, setWorkspaceName] = useState("");
-  const [workspaceColor, setWorkspaceColor] = useState("");
+  const [workspaceColor, setWorkspaceColor] = useState("#3b82f6");
   const [nameError, setNameError] = useState("");
   const [open, setOpen] = useState(false);
-  const [isLoading, setLoading] = useState(false);
 
-  const handleCreate = async () => {
+  const queryClient = useQueryClient();
+
+  const createWorkspace = useMutation({
+    mutationFn: async () => {
+      await api.post("/workspaces", {
+        name: workspaceName,
+        color: workspaceColor,
+      });
+    },
+    onSuccess: async () => {
+
+      setWorkspaceName("");
+      setWorkspaceColor("#3b82f6");
+      setOpen(false);
+
+      await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
+  const deleteWorkspace = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete("/workspaces", {
+        data: {
+          workspaceId: id
+        }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
+  const handleCreate = () => {
     const name = workspaceName.trim();
 
     if (!name) {
@@ -64,21 +102,7 @@ export function NavWorkspaces({
     }
 
     setNameError("");
-
-    try {
-      setLoading(true);
-
-      await api.post("/workspaces", {
-        name: name,
-        color: workspaceColor,
-      });
-
-      setOpen(false);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
+    createWorkspace.mutate();
   };
 
   return (
@@ -95,7 +119,7 @@ export function NavWorkspaces({
               />
             }
           />
-          <PopoverContent align="start" className={"border border-border pt-0"}>
+          <PopoverContent align="start" className="border border-border pt-0">
             <PopoverHeader>
               <PopoverTitle>Create Workspace</PopoverTitle>
               <PopoverDescription>
@@ -108,7 +132,7 @@ export function NavWorkspaces({
                   <Input
                     type="color"
                     className="absolute -left-2 -top-2 h-12 w-12 cursor-pointer border-0 p-0"
-                    defaultValue="#3b82f6"
+                    value={workspaceColor}
                     onChange={(e) => setWorkspaceColor(e.target.value)}
                   />
                 </div>
@@ -119,6 +143,7 @@ export function NavWorkspaces({
                   <Input
                     type="text"
                     placeholder="Workspace name"
+                    value={workspaceName}
                     aria-invalid={!!nameError}
                     className="h-8"
                     onChange={(e) => {
@@ -129,8 +154,13 @@ export function NavWorkspaces({
                   {nameError && <FieldError>{nameError}</FieldError>}
                 </Field>
               </div>
-              <Button size="sm" className="w-full" onClick={handleCreate}>
-                {isLoading ? (
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={handleCreate}
+                disabled={createWorkspace.isPending}
+              >
+                {createWorkspace.isPending ? (
                   <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                 ) : (
                   "Create"
@@ -143,12 +173,10 @@ export function NavWorkspaces({
       <SidebarMenu>
         {workspaces.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton render={<a href={item.url} />}>
+            <SidebarMenuButton>
               <span
-                className={`size-1.5 rounded-full `}
-                style={{
-                  backgroundColor: item.color,
-                }}
+                className="size-1.5 rounded-full"
+                style={{ backgroundColor: item.color }}
               />
               <span>{item.name}</span>
             </SidebarMenuButton>
@@ -167,7 +195,8 @@ export function NavWorkspaces({
                 />
                 <span className="sr-only">More</span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className={"min-w-32"}
+              <DropdownMenuContent
+                className="min-w-32"
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
@@ -180,7 +209,11 @@ export function NavWorkspaces({
                   <span>Edit</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
+                <DropdownMenuItem
+                  variant="destructive"
+                  disabled={deleteWorkspace.isPending}
+                  onClick={() => deleteWorkspace.mutate(item.id)}
+                >
                   <HugeiconsIcon
                     icon={Delete02Icon}
                     strokeWidth={2}

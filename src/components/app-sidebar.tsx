@@ -18,9 +18,11 @@ import { Button } from "./ui/button";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { AddIcon } from "@hugeicons/core-free-icons";
+import { useNavigate } from "react-router";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = authClient.useSession();
+  const navigate = useNavigate();
 
   const { data: workspaces = [] } = useQuery({
     queryKey: ["workspaces"],
@@ -29,6 +31,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       return res.data;
     },
   });
+
+  const handleCreate = () => {
+    navigate("/dashboard/note");
+  };
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -46,7 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
 
         <div className="px-2">
-          <Button className="w-full gap-2">
+          <Button className="w-full gap-2" onClick={handleCreate}>
             <HugeiconsIcon icon={AddIcon} className="h-4 w-4" />
             New Note
           </Button>

@@ -8,6 +8,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupLabel,
@@ -38,6 +42,7 @@ import { useState } from "react";
 import { Field, FieldError } from "./ui/field";
 import { api } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import EditWorkspace from "./edit-workspace";
 
 export function NavWorkspaces({
   workspaces,
@@ -54,6 +59,7 @@ export function NavWorkspaces({
   const [workspaceColor, setWorkspaceColor] = useState("#3b82f6");
   const [nameError, setNameError] = useState("");
   const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const queryClient = useQueryClient();
 
@@ -172,7 +178,7 @@ export function NavWorkspaces({
       </SidebarGroupAction>
       <SidebarMenu>
         {workspaces.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.id}>
             <SidebarMenuButton>
               <span
                 className="size-1.5 rounded-full"
@@ -180,7 +186,8 @@ export function NavWorkspaces({
               />
               <span>{item.name}</span>
             </SidebarMenuButton>
-            <DropdownMenu>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DropdownMenu>
               <DropdownMenuTrigger
                 render={
                   <SidebarMenuAction
@@ -200,7 +207,8 @@ export function NavWorkspaces({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
+                <DialogTrigger className={"w-full"} >
+                  <DropdownMenuItem>
                   <HugeiconsIcon
                     icon={Edit03Icon}
                     strokeWidth={2}
@@ -208,6 +216,7 @@ export function NavWorkspaces({
                   />
                   <span>Edit</span>
                 </DropdownMenuItem>
+                </DialogTrigger>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
@@ -223,6 +232,9 @@ export function NavWorkspaces({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <EditWorkspace key={item.id} item={item} onClose={() => setDialogOpen(false)} />
+            </Dialog>
           </SidebarMenuItem>
         ))}
       </SidebarMenu>

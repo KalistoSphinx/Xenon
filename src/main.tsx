@@ -35,7 +35,7 @@ const router = createBrowserRouter(
       <Route element={<ProtectedRoute />}>
         <Route path="dashboard" element={<HomePage />}>
           <Route index element={<Navigate to="notes" replace />} />
-          <Route path="note" element={<EditorPage />} />
+          <Route path="note/:id" element={<EditorPage />} />
           <Route path="notes" element={<AllNotes />} />
           <Route path="starred" element={<StarredNotes />} />
           <Route path="trash" element={<TrashNotes />} />

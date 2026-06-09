@@ -16,7 +16,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "./ui/button";
 import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AddIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router";
 
@@ -32,8 +32,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
   });
 
-  const handleCreate = () => {
-    navigate("/dashboard/note");
+  const createNote = useMutation({
+    mutationFn: async () => {
+      const res = await api.post("/note")
+      return res.data
+    },
+    onError: (error) => {
+      console.log(error)
+    }
+  })
+
+  const handleCreate = async () => {
+    const noteId = await createNote.mutateAsync()
+
+    navigate(`/dashboard/note/${noteId}`)
   };
 
   return (

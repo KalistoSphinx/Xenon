@@ -23,7 +23,7 @@ export default function HomePage() {
   
   const location = useLocation()
   const path = location.pathname
-  const isEditorRoute = path === "/dashboard/note"
+  const isEditorRoute = path.startsWith("/dashboard/note/")
   const name = path.split("/").pop()
   const title = name?.charAt(0).toUpperCase() + name!.slice(1)
   const [viewType, setViewType] = useState("cards")

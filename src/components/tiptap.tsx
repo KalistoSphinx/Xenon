@@ -115,6 +115,7 @@ const Tiptap = () => {
                 color: string
               }) => (
                 <Badge
+                  key={workspace.id}
                   variant={"outline"}
                   className="cursor-pointer flex gap-1.5"
                 >

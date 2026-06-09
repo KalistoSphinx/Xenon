@@ -7,9 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import {
   SidebarGroup,
   SidebarGroupAction,
@@ -40,39 +38,37 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { Field, FieldError } from "./ui/field";
 import { api } from "@/lib/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import EditWorkspace from "./edit-workspace";
 
-type Workspace = { id: string; name: string; color: string; };
+type Workspace = { id: string; name: string; color: string };
 
-export function NavWorkspaces({
-  workspaces,
-}: {
-  workspaces: Workspace[];
-}) {
+export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
   const { isMobile } = useSidebar();
 
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceColor, setWorkspaceColor] = useState("#3b82f6");
   const [nameError, setNameError] = useState("");
   const [open, setOpen] = useState(false);
-  
-  const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
-
-  const queryClient = useQueryClient();
+  const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(
+    null,
+  );
 
   const createWorkspace = useMutation({
     mutationFn: async () => {
-      await api.post("/workspaces", {
+      const res = await api.post("/workspaces", {
         name: workspaceName,
         color: workspaceColor,
       });
+
+      return res.data
     },
-    onSuccess: async () => {
+    onSuccess: async (newWorkspace, _variables, _onMutateResult, context) => {
       setWorkspaceName("");
       setWorkspaceColor("#3b82f6");
       setOpen(false);
-      await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      
+      context.client.setQueryData(['workspaces'], (old: any) => [...old, newWorkspace])
     },
     onError: (error) => {
       console.log(error);
@@ -81,18 +77,25 @@ export function NavWorkspaces({
 
   const deleteWorkspace = useMutation({
     mutationFn: async (id: string) => {
-      await api.delete("/workspaces", {
-        data: {
-          workspaceId: id
-        }
-      });
+      await api.delete(`/workspaces/${id}`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    onMutate: async (deleteId, context) => {
+      await context.client.cancelQueries({queryKey: ["workspaces"]})
+
+      const previousWorkspaces = context.client.getQueryData(["workspaces"])
+
+      context.client.setQueryData(["workspaces"], (old: any) =>
+        old.filter((workspace: any) => workspace.id != deleteId))
+
+      return {previousWorkspaces}
     },
-    onError: (error) => {
-      console.log(error);
+    onError: (error, _, onMutateResult, context) => {
+      context.client.setQueryData(["workspaces"], onMutateResult?.previousWorkspaces)
+      console.log(error)
     },
+    onSettled: (_data, _error, _variables, _onMutateResult ,context) => {
+      context.client.invalidateQueries({ queryKey: ['workspaces']})
+    }
   });
 
   const handleCreate = () => {
@@ -172,7 +175,7 @@ export function NavWorkspaces({
           </PopoverContent>
         </Popover>
       </SidebarGroupAction>
-      
+
       <SidebarMenu>
         {workspaces.map((item) => (
           <SidebarMenuItem key={item.id}>
@@ -231,17 +234,17 @@ export function NavWorkspaces({
         ))}
       </SidebarMenu>
 
-      <Dialog 
-        open={!!editingWorkspace} 
+      <Dialog
+        open={!!editingWorkspace}
         onOpenChange={(open) => {
           if (!open) setEditingWorkspace(null);
         }}
       >
         {editingWorkspace && (
-          <EditWorkspace 
+          <EditWorkspace
             key={editingWorkspace.id}
-            item={editingWorkspace} 
-            onClose={() => setEditingWorkspace(null)} 
+            item={editingWorkspace}
+            onClose={() => setEditingWorkspace(null)}
           />
         )}
       </Dialog>

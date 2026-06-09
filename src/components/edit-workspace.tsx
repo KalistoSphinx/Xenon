@@ -12,34 +12,51 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 interface workspace {
-  id: string
+  id: string;
   name: string;
   color: string;
 }
 
-export default function EditWorkspace({item, onClose} : {
-  item: workspace,
-  onClose: () => void
+export default function EditWorkspace({
+  item,
+  onClose,
+}: {
+  item: workspace;
+  onClose: () => void;
 }) {
   const [newWorkspaceName, setWorkspaceName] = useState(item.name);
   const [newWorkspaceColor, setWorkspaceColor] = useState(item.color);
   const [nameError, setNameError] = useState("");
-  const queryClient = useQueryClient();
 
   const updateWorkspace = useMutation({
-    mutationFn: async (id: string) => {
-      await api.patch(`/workspaces/${id}`, {
-        name: newWorkspaceName,
-        color: newWorkspaceColor,
-      });
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<workspace>;
+    }) => {
+      await api.patch(`/workspaces/${id}`, data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    onMutate: async ({id: workspaceId, data: payload}, context) => {
+      await context.client.cancelQueries({queryKey: ["workspaces"]})
+
+      const previousWorkspaces = context.client.getQueryData(["workspaces"])
+
+      context.client.setQueryData(["workspaces"], (old: any) =>
+        old.map((workspace: any) => workspace.id == workspaceId ? {...workspace, ...payload} : workspace))
+
       onClose()
+
+      return {previousWorkspaces}
     },
-    onError: (error) => {
+    onError: (error, _, onMutateResult, context) => {
+      context.client.setQueryData(["workspaces"], onMutateResult?.previousWorkspaces)
       console.log(error);
     },
+    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
+      context.client.invalidateQueries({queryKey: ["workspaces"]})
+    }
   });
 
   const handleUpdate = (id: string) => {
@@ -51,7 +68,23 @@ export default function EditWorkspace({item, onClose} : {
     }
 
     setNameError("");
-    updateWorkspace.mutate(id);
+
+    const payload: Partial<workspace> = {};
+
+    if (name !== item.name) {
+      payload.name = name;
+    }
+
+    if (newWorkspaceColor !== item.color) {
+      payload.color = newWorkspaceColor;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      onClose();
+      return;
+    }
+
+    updateWorkspace.mutate({ id, data: payload });
   };
 
   return (
@@ -89,17 +122,13 @@ export default function EditWorkspace({item, onClose} : {
           </Field>
         </div>
         <Button
-                size="sm"
-                className="w-full"
-                onClick={() => handleUpdate(item.id)}
-                disabled={updateWorkspace.isPending}
-              >
-                {updateWorkspace.isPending ? (
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  "Save"
-                )}
-              </Button>
+          size="sm"
+          className="w-full"
+          onClick={() => handleUpdate(item.id)}
+          disabled={updateWorkspace.isPending}
+        >
+          Save
+        </Button>
       </div>
     </DialogContent>
   );

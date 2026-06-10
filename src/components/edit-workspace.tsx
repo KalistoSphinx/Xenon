@@ -8,8 +8,7 @@ import {
 } from "./ui/dialog";
 import { Field, FieldError } from "./ui/field";
 import { Input } from "./ui/input";
-import { useMutation } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useUpdateWorkspace } from "@/Repos/workspaceRepo";
 
 interface workspace {
   id: string;
@@ -27,37 +26,7 @@ export default function EditWorkspace({
   const [newWorkspaceName, setWorkspaceName] = useState(item.name);
   const [newWorkspaceColor, setWorkspaceColor] = useState(item.color);
   const [nameError, setNameError] = useState("");
-
-  const updateWorkspace = useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<workspace>;
-    }) => {
-      await api.patch(`/workspaces/${id}`, data);
-    },
-    onMutate: async ({id: workspaceId, data: payload}, context) => {
-      await context.client.cancelQueries({queryKey: ["workspaces"]})
-
-      const previousWorkspaces = context.client.getQueryData(["workspaces"])
-
-      context.client.setQueryData(["workspaces"], (old: any) =>
-        old.map((workspace: any) => workspace.id == workspaceId ? {...workspace, ...payload} : workspace))
-
-      onClose()
-
-      return {previousWorkspaces}
-    },
-    onError: (error, _, onMutateResult, context) => {
-      context.client.setQueryData(["workspaces"], onMutateResult?.previousWorkspaces)
-      console.log(error);
-    },
-    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({queryKey: ["workspaces"]})
-    }
-  });
+  const updateWorkspace = useUpdateWorkspace(onClose)
 
   const handleUpdate = (id: string) => {
     const name = newWorkspaceName.trim();
@@ -69,7 +38,7 @@ export default function EditWorkspace({
 
     setNameError("");
 
-    const payload: Partial<workspace> = {};
+    const payload: Partial<any> = {};
 
     if (name !== item.name) {
       payload.name = name;

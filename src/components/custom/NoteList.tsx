@@ -11,11 +11,11 @@ import {
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 
-export function NoteList() {
+export function NoteList({ index = 0 }: { index?: number }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Card size="sm" className="group">
+    <Card size="sm" className="group animate-drop-in" style={{ animationDelay: `${index * 0.05}s` }}>
       <CardContent className="flex items-center justify-between gap-2">
         <div className="flex items-center min-w-0 flex-1">
           <span className="size-1.5 min-w-1.5 min-h-1.5 rounded-full bg-amber-600 shrink-0" />

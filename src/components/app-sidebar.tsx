@@ -19,6 +19,7 @@ import { api } from "@/lib/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AddIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router";
+import { useCreateNote } from "@/Repos/notesRepo";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = authClient.useSession();
@@ -32,21 +33,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
   });
 
-  const createNote = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await api.post("/note", {
-        id: id,
-      });
-      return res.data;
-    },
-    onSuccess: (newNote, _variables, _onMutateResult, context) => {
-
-      context.client.setQueryData(["notes"], (old: any) => [...old, newNote]);
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
+  const createNote = useCreateNote()
 
   const handleCreate = async () => {
     const noteId = crypto.randomUUID();

@@ -37,11 +37,14 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { Field, FieldError } from "./ui/field";
-import { api } from "@/lib/api";
-import { useMutation } from "@tanstack/react-query";
 import EditWorkspace from "./edit-workspace";
+import { useCreateWorkspace, useDeleteWorkspace } from "@/Repos/workspaceRepo";
 
-type Workspace = { id: string; name: string; color: string };
+interface Workspace {
+  id: string;
+  name: string;
+  color: string;
+}
 
 export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
   const { isMobile } = useSidebar();
@@ -53,54 +56,10 @@ export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
   const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(
     null,
   );
+  const createWorkspace = useCreateWorkspace();
+  const deleteWorkspace = useDeleteWorkspace();
 
-  const createWorkspace = useMutation({
-    mutationFn: async () => {
-      const res = await api.post("/workspaces", {
-        name: workspaceName,
-        color: workspaceColor,
-      });
-      return res.data; 
-    },
-    onSuccess: (newWorkspace, _variables, _onMutateResult, context) => {
-      setWorkspaceName("");
-      setWorkspaceColor("#3b82f6");
-      setOpen(false);
-
-      context.client.setQueryData(["workspaces"], (old: any) => [
-        ...(old || []), 
-        newWorkspace
-      ]);
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
-
-  const deleteWorkspace = useMutation({
-    mutationFn: async (id: string) => {
-      await api.delete(`/workspaces/${id}`);
-    },
-    onMutate: async (deleteId, context) => {
-      await context.client.cancelQueries({queryKey: ["workspaces"]})
-
-      const previousWorkspaces = context.client.getQueryData(["workspaces"])
-
-      context.client.setQueryData(["workspaces"], (old: any) =>
-        old.filter((workspace: any) => workspace.id != deleteId))
-
-      return {previousWorkspaces}
-    },
-    onError: (error, _, onMutateResult, context) => {
-      context.client.setQueryData(["workspaces"], onMutateResult?.previousWorkspaces)
-      console.log(error)
-    },
-    onSettled: (_data, _error, _variables, _onMutateResult ,context) => {
-      context.client.invalidateQueries({ queryKey: ['workspaces']})
-    }
-  });
-
-  const handleCreate = () => {
+  const handleCreate = async () => {
     const name = workspaceName.trim();
 
     if (!name) {
@@ -109,7 +68,12 @@ export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
     }
 
     setNameError("");
-    createWorkspace.mutate();
+
+    await createWorkspace.mutateAsync({ workspaceName, workspaceColor });
+
+    setWorkspaceName("");
+    setWorkspaceColor("#3b82f6");
+    setOpen(false);
   };
 
   return (

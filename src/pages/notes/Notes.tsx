@@ -43,16 +43,16 @@ export function AllNotes() {
       </div>
     ) : (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-3">
-        {notes.map((note: any) => <NoteCard/>)}
+        {notes.map((data: any, i: number) => <NoteCard key={data.notes.id} index={i} note={data.notes} workspace={data.workspaces}/>)}
       </div>
     )
   ) : (
     <div className="flex flex-col gap-4 p-4">
-      <NoteList />
-      <NoteList />
-      <NoteList />
-      <NoteList />
-      <NoteList />
+      <NoteList index={0} />
+      <NoteList index={1} />
+      <NoteList index={2} />
+      <NoteList index={3} />
+      <NoteList index={4} />
     </div>
   );
 }

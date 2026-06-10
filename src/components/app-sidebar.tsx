@@ -33,19 +33,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   });
 
   const createNote = useMutation({
-    mutationFn: async () => {
-      const res = await api.post("/note")
-      return res.data
+    mutationFn: async (id: string) => {
+      const res = await api.post("/note", {
+        id: id,
+      });
+      return res.data;
+    },
+    onSuccess: (newNote, _variables, _onMutateResult, context) => {
+
+      context.client.setQueryData(["notes"], (old: any) => [...old, newNote]);
     },
     onError: (error) => {
-      console.log(error)
-    }
-  })
+      console.log(error);
+    },
+  });
 
   const handleCreate = async () => {
-    const noteId = await createNote.mutateAsync()
+    const noteId = crypto.randomUUID();
 
-    navigate(`/dashboard/note/${noteId}`)
+    createNote.mutate(noteId);
+
+    navigate(`/dashboard/note/${noteId}`);
   };
 
   return (

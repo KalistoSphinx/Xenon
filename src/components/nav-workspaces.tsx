@@ -60,15 +60,17 @@ export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
         name: workspaceName,
         color: workspaceColor,
       });
-
-      return res.data
+      return res.data; 
     },
-    onSuccess: async (newWorkspace, _variables, _onMutateResult, context) => {
+    onSuccess: (newWorkspace, _variables, _onMutateResult, context) => {
       setWorkspaceName("");
       setWorkspaceColor("#3b82f6");
       setOpen(false);
-      
-      context.client.setQueryData(['workspaces'], (old: any) => [...old, newWorkspace])
+
+      context.client.setQueryData(["workspaces"], (old: any) => [
+        ...(old || []), 
+        newWorkspace
+      ]);
     },
     onError: (error) => {
       console.log(error);

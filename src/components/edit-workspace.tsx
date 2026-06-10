@@ -8,7 +8,7 @@ import {
 } from "./ui/dialog";
 import { Field, FieldError } from "./ui/field";
 import { Input } from "./ui/input";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 interface workspace {

@@ -16,16 +16,15 @@ import { HugeiconsIcon } from "@hugeicons/react";
 export function AllNotes() {
   const viewType = useOutletContext();
 
-  const { data: notes = [] } = useQuery({
+  const { data: notes = [], isPending } = useQuery({
     queryKey: ["notes"],
     queryFn: async () => {
       const res = await api.get("/note");
-      console.log(res.data)
       return res.data;
     },
   });
 
-  return viewType == "cards" ? (
+  return isPending ? <div></div> : viewType == "cards" ? (
     notes.length == 0 ? (
       <div className="h-full flex flex-col items-center justify-center">
         <Empty>

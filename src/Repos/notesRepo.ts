@@ -10,7 +10,6 @@ export const useCreateNote = () =>
       return res.data;
     },
     onSuccess: (newNote, _variables, _onMutateResult, context) => {
-      console.log(newNote)
       context.client.setQueryData(["notes"], (old: any) => [
         ...(old || []),
         { notes: newNote, workspaces: {} },
@@ -48,7 +47,8 @@ export const useUpdateNote = () =>
       );
       console.log(error);
     },
-    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
+    onSettled: (_data, _error, variables, _onMutateResult, context) => {
       context.client.invalidateQueries({ queryKey: ["notes"] });
+      context.client.invalidateQueries({ queryKey: ["notes", variables.id] });
     },
   });

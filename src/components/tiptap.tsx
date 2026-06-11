@@ -36,6 +36,7 @@ import {
 import { Badge } from "./ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useEffect } from "react";
 
 const CustomTaskItem = TaskItem.extend({
   addNodeView() {
@@ -43,7 +44,15 @@ const CustomTaskItem = TaskItem.extend({
   },
 });
 
-const Tiptap = () => {
+interface TipTapProps{
+  content: any;
+  title: string;
+  titleChange: (title: string) => void;
+  onUpdate: (content: any) => void;
+}
+
+const Tiptap = ({title, content, titleChange, onUpdate} : TipTapProps) => {
+
   const editor = useEditor({
     extensions: [
       Document,
@@ -80,7 +89,18 @@ const Tiptap = () => {
       }),
     ],
     content: "",
+    onUpdate: ({ editor }) => {
+      onUpdate?.(editor.getJSON());
+    },
   });
+
+  useEffect(() => {
+    if (editor && content && !editor.isDestroyed) {
+      if (editor.isEmpty) {
+        editor.commands.setContent(content);
+      }
+    }
+  }, [content, editor]);
 
   const { data: workspaces = [] } = useQuery({
     queryKey: ["workspaces"],
@@ -130,6 +150,8 @@ const Tiptap = () => {
         </Popover>
         <textarea
           rows={1}
+          value={title}
+          onChange={(e) => titleChange(e.target.value)}
           className={
             "w-full max-w-full resize-none overflow-hidden wrap-break-word text-[38px] font-bold outline-none field-sizing-content"
           }

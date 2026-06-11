@@ -20,19 +20,44 @@ import {
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 import { useUpdateNote } from "@/Repos/notesRepo";
+import { useNavigate } from "react-router";
+import type { Note, Workspace } from "@/lib/models";
 
-interface Note {
-  title: string;
-  content: any;
-  id: string;
-  isStarred: boolean;
-  isTrashed: boolean;
-  createdAt: EpochTimeStamp;
+function extractTextFromTiptap(node: any): string {
+  if (!node) return "";
+
+  if (node.type === "text") {
+    return node.text || "";
+  }
+
+  if (node.content && Array.isArray(node.content)) {
+    const childText = node.content.map(extractTextFromTiptap).join("");
+
+    const blockNodes = new Set([
+      "paragraph",
+      "heading",
+      "blockquote",
+      "bulletList",
+      "orderedList",
+      "listItem",
+      "codeBlock",
+      "horizontalRule",
+    ]);
+
+    if (blockNodes.has(node.type)) {
+      return childText + "\n";
+    }
+
+    return childText;
+  }
+
+  return "";
 }
 
-interface Workspace {
-  name: string;
-  color: string;
+function getPreview(tiptapJson: any, maxLength = 150): string {
+  const fullText = extractTextFromTiptap(tiptapJson).trim();
+  if (fullText.length <= maxLength) return fullText;
+  return fullText.slice(0, maxLength).trimEnd() + "…";
 }
 
 export function NoteCard({
@@ -46,7 +71,7 @@ export function NoteCard({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [starred, setStarred] = useState(note.isStarred);
-
+  const navigate = useNavigate();
   const updateNote = useUpdateNote();
 
   useEffect(() => {
@@ -63,16 +88,29 @@ export function NoteCard({
     });
   };
 
+  const preview = getPreview(note.content);
+
   return (
     <Card
       size="sm"
       className="group animate-drop-in transition-all duration-200 ease-in-out hover:-translate-y-0.5"
       style={{ animationDelay: `${index * 0.05}s` }}
+      onClick={() => navigate(`/dashboard/note/${note.id}`)}
     >
       <CardContent className="flex justify-between -mb-2">
-        <div className="flex items-center gap-1.5 text-amber-600">
-          <span className="size-1.5 rounded-full bg-amber-600" />
-          <p className="text-xs">{note.id}</p>
+        <div
+          className="flex items-center gap-1.5"
+          style={{
+            color: workspace?.color || "var(--muted-foreground)",
+          }}
+        >
+          <span
+            className="size-1.5 rounded-full"
+            style={{
+              backgroundColor: workspace?.color || "var(--muted-foreground)",
+            }}
+          />
+          <p className="text-xs">{workspace?.name || "No workspace"}</p>
         </div>
         <CardAction
           className={`flex items-center gap-2 text-muted-foreground transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
@@ -85,7 +123,9 @@ export function NoteCard({
             }}
             fill={starred ? "#fbbf24" : "none"}
             stroke={starred ? "#fbbf24" : "currentColor"}
-            className={"cursor-pointer transition-all duration-200 hover:scale-120"}
+            className={
+              "cursor-pointer transition-all duration-200 hover:scale-120"
+            }
           />
           <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
             <DropdownMenuTrigger
@@ -110,12 +150,9 @@ export function NoteCard({
         </CardAction>
       </CardContent>
       <CardHeader>
-        <CardTitle className="text-sm">
-          Reading list - distributed systems
-        </CardTitle>
+        <CardTitle className="text-sm">{note.title || "Untitled"}</CardTitle>
         <CardDescription className="text-xs">
-          Papers to read: Dynamo (Amazon), Raft Consensus, Spanner, Bigtable,
-          MapReduce, Chord DHT.
+          {preview || "No content"}
         </CardDescription>
       </CardHeader>
       <CardContent></CardContent>

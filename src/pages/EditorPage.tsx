@@ -1,58 +1,16 @@
 import Tiptap from "@/components/tiptap";
-import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Star } from "lucide-react";
-import { useNavigate, useParams } from "react-router";
-import { useState, useEffect } from "react";
-import { useUpdateNote } from "@/Repos/notesRepo";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ArrowLeft, Ellipsis, Star, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export function EditorPage(){
-    const { id } = useParams();
     const navigate = useNavigate();
-    const [starred, setStarred] = useState(false);
-
-    const { data: noteData, isPending } = useQuery({
-        queryKey: ["note", id],
-        queryFn: async () => {
-            const res = await api.get(`/note/${id}`);
-            return res.data;
-        },
-        enabled: !!id,
-    });
-
-    const note = noteData?.notes || noteData;
-    const updateNote = useUpdateNote();
-
-    useEffect(() => {
-        if (note) setStarred(note.isStarred);
-    }, [note?.isStarred]);
-
-    const handleStarToggle = () => {
-        const newVal = !starred;
-        setStarred(newVal);
-        updateNote.mutate({
-            id: id!,
-            value: { isStarred: newVal },
-        });
-    };
-
-    const formatDate = (d: string) => {
-        if (!d) return "";
-        const date = new Date(d);
-        return date.toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-        });
-    };
-
-    if (isPending) {
-        return (
-            <div className="flex min-h-0 w-full flex-1 items-center justify-center">
-                <p className="text-sm text-muted-foreground">Loading...</p>
-            </div>
-        );
-    }
 
     return (
         <div className="flex min-h-0 w-full flex-1 flex-col">
@@ -67,8 +25,8 @@ export function EditorPage(){
                         <ArrowLeft size={18} strokeWidth={2} />
                     </button>
                     <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{note?.title || "Untitled"}</p>
-                        <p className="text-xs text-muted-foreground">{formatDate(note?.createdAt)}</p>
+                        <p className="truncate text-sm font-medium">Reading list - distributed systems</p>
+                        <p className="text-xs text-muted-foreground">2 june 2026</p>
                     </div>
                 </div>
 
@@ -77,16 +35,36 @@ export function EditorPage(){
                         type="button"
                         className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-foreground"
                         aria-label="Star note"
-                        onClick={handleStarToggle}
                     >
-                        <Star size={17} strokeWidth={2} fill={starred ? "#fbbf24" : "none"} stroke={starred ? "#fbbf24" : "currentColor"} />
+                        <Star size={17} strokeWidth={2} />
                     </button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger
+                            render={
+                                <button
+                                    type="button"
+                                    className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted"
+                                    aria-label="More note actions"
+                                />
+                            }
+                        >
+                            <Ellipsis size={18} strokeWidth={2} />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="min-w-36">
+                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem variant="destructive">
+                                <Trash2 size={14} />
+                                Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
 
             <div className="flex w-full justify-center px-4 py-16">
                 <div className="flex w-full max-w-3xl min-w-0 flex-col gap-4">
-                    <Tiptap noteId={id!} initialTitle={note?.title || ""} initialContent={note?.content} />
+                    <Tiptap />
                 </div>
             </div>
         </div>

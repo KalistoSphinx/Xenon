@@ -41,7 +41,14 @@ export const useUpdateNote = () =>
 
       return { previousNotes };
     },
-    onError: (error) => {
+    onError: (error, _, onMutateResult, context) => {
+      context.client.setQueryData(
+        ["notes"],
+        onMutateResult?.previousNotes,
+      );
       console.log(error);
+    },
+    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
+      context.client.invalidateQueries({ queryKey: ["notes"] });
     },
   });

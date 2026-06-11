@@ -36,6 +36,8 @@ import {
 import { Badge } from "./ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useUpdateNote } from "@/Repos/notesRepo";
+import { useEffect, useRef, useState } from "react";
 
 const CustomTaskItem = TaskItem.extend({
   addNodeView() {
@@ -43,7 +45,22 @@ const CustomTaskItem = TaskItem.extend({
   },
 });
 
-const Tiptap = () => {
+const Tiptap = ({ noteId, initialTitle = "", initialContent = null }: {
+  noteId: string;
+  initialTitle?: string;
+  initialContent?: any;
+}) => {
+  const [title, setTitle] = useState(initialTitle);
+  const updateNote = useUpdateNote();
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const debounceSave = (value: any) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      updateNote.mutate({ id: noteId, value });
+    }, 800);
+  };
+
   const editor = useEditor({
     extensions: [
       Document,
@@ -79,8 +96,31 @@ const Tiptap = () => {
         types: ["heading", "paragraph"],
       }),
     ],
-    content: "",
+    content: initialContent || "",
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      debounceSave({ content: html });
+    },
   });
+
+  useEffect(() => {
+    if (editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+    setTitle(initialTitle);
+  }, [noteId]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, []);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    debounceSave({ title: newTitle });
+  };
 
   const { data: workspaces = [] } = useQuery({
     queryKey: ["workspaces"],
@@ -135,6 +175,8 @@ const Tiptap = () => {
           }
           name="title"
           placeholder="Title"
+          value={title}
+          onChange={handleTitleChange}
         ></textarea>
       </div>
       <MenuBar editor={editor} />

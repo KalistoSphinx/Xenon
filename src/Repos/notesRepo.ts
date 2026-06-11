@@ -27,8 +27,10 @@ export const useUpdateNote = () =>
     },
     onMutate: async ({ id: noteId, value: value }, context) => {
       await context.client.cancelQueries({ queryKey: ["notes"] });
+      await context.client.cancelQueries({ queryKey: ["notes", noteId] });
 
       const previousNotes = context.client.getQueryData(["notes"]);
+      const previousNote = context.client.getQueryData(["notes", noteId]);
 
       context.client.setQueryData(["notes"], (old: any) =>
         old.map((item: any) =>
@@ -38,12 +40,24 @@ export const useUpdateNote = () =>
         ),
       );
 
-      return { previousNotes };
+      context.client.setQueryData(["notes", noteId], (old: any) => {
+        if (!old) return old;
+        if (old.notes) {
+          return { ...old, notes: { ...old.notes, ...value } };
+        }
+        return { ...old, ...value };
+      });
+
+      return { previousNotes, previousNote  };
     },
-    onError: (error, _, onMutateResult, context) => {
+    onError: (error, variables, onMutateResult, context) => {
       context.client.setQueryData(
         ["notes"],
         onMutateResult?.previousNotes,
+      );
+      context.client.setQueryData(
+        ["notes", variables.id],
+        onMutateResult?.previousNote,
       );
       console.log(error);
     },

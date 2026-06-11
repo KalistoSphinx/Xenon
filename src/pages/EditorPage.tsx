@@ -8,74 +8,87 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { api } from "@/lib/api";
 import { useUpdateNote } from "@/Repos/notesRepo";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Ellipsis, Star, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 export function EditorPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const queryClient = useQueryClient();
   const updateNote = useUpdateNote();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState(null);
-  const [isDirty, setIsDirty] = useState(false);
 
-  const { data: data } = useQuery({
-    queryKey: ["note", id],
+  const [title, setTitle] = useState("");
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const titleRef = useRef("");
+  const contentRef = useRef<any>(null);
+  const isDirtyRef = useRef(false);
+  // Track which note id the refs currently belong to
+  const loadedIdRef = useRef<string | undefined>(undefined);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["notes", id],
     queryFn: async () => {
       const res = await api.get(`/note/${id}`);
       return res.data;
     },
-    initialData: () => {
-      const cachedNotes = queryClient.getQueryData<any[]>(["notes"]);
-      const cachedNote = cachedNotes?.find((n) => n.notes.id === id);
-      return cachedNote ? cachedNote.notes : undefined;
-    },
   });
 
+  const note = data?.notes ?? data;
+
   useEffect(() => {
-    if (data && !isDirty) {
-      setTitle(data?.notes?.title);
-      setContent(data?.notes?.content);
+    if (!note) return;
+    if (loadedIdRef.current !== id) {
+      loadedIdRef.current = id;
+      isDirtyRef.current = false;
+      titleRef.current = note.title ?? "";
+      contentRef.current = note.content ?? null;
+      setTitle(note.title ?? "");
     }
-  }, [data]);
+  }, [note, id]);
+
+  const saveNow = () => {
+    if (!isDirtyRef.current) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    updateNote.mutate({
+      id: id as string,
+      value: { title: titleRef.current, content: contentRef.current },
+    });
+    isDirtyRef.current = false;
+  };
+
+  const scheduleSave = () => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(saveNow, 1000);
+  };
 
   useEffect(() => {
-    if (!isDirty) return;
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveNow();
+    };
+  }, [id]);
 
-    // Set a timer to execute the save after 1 second of inactivity
-    const timer = setTimeout(() => {
-      console.log("Auto-saving to DB...");
-
-      updateNote.mutate({
-        id: id as string,
-        value: {
-          title: title,
-          content: content,
-        },
-      });
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [title, content, isDirty, id]);
-
-  const handleTitleChange = (title: string) => {
-    setTitle(title);
-    setIsDirty(true);
+  const handleTitleChange = (newTitle: string) => {
+    titleRef.current = newTitle;
+    isDirtyRef.current = true;
+    setTitle(newTitle);
+    scheduleSave();
   };
 
-  const handleContentUpdate = (jsonContent: any) => {
-    setContent(jsonContent);
-    setIsDirty(true);
+  const handleContentUpdate = (newContent: any) => {
+    contentRef.current = newContent;
+    isDirtyRef.current = true;
+    scheduleSave();
   };
 
-  const formattedDate =
-    new Date(data?.notes?.createdAt).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }) || "Loading";
+  const formattedDate = note?.createdAt
+    ? new Date(note.createdAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "Loading";
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
@@ -84,13 +97,18 @@ export function EditorPage() {
           <button
             type="button"
             className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              saveNow();
+              navigate(-1);
+            }}
             aria-label="Go back"
           >
             <ArrowLeft size={18} strokeWidth={2} />
           </button>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{title || "Untitled"}</p>
+            <p className="truncate text-sm font-medium">
+              {title || "Untitled"}
+            </p>
             <p className="text-xs text-muted-foreground">{formattedDate}</p>
           </div>
         </div>
@@ -129,12 +147,23 @@ export function EditorPage() {
 
       <div className="flex w-full justify-center px-4 py-16">
         <div className="flex w-full max-w-3xl min-w-0 flex-col gap-4">
-          <Tiptap 
-            title={title}
-            content={content}
-            titleChange={handleTitleChange}
-            onUpdate={handleContentUpdate}
-          />
+          {isLoading || !note ? (
+            <div className="flex flex-col gap-4 animate-pulse">
+              <div className="h-10 w-2/3 rounded-md bg-muted" />
+              <div className="h-4 w-full rounded-md bg-muted" />
+              <div className="h-4 w-5/6 rounded-md bg-muted" />
+              <div className="h-4 w-4/6 rounded-md bg-muted" />
+            </div>
+          ) : (
+            <Tiptap
+              key={id}
+              initialTitle={note.title ?? ""}
+              initialContent={note.content ?? null}
+              onTitleChange={handleTitleChange}
+              onContentUpdate={handleContentUpdate}
+              onBlur={saveNow}
+            />
+          )}
         </div>
       </div>
     </div>

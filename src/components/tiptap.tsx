@@ -23,7 +23,6 @@ import {
 } from "@tiptap/extension-list";
 import Document from "@tiptap/extension-document";
 import { Checkbox } from "./ui/checkbox";
-
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { Plus } from "lucide-react";
 import {
@@ -36,7 +35,9 @@ import {
 import { Badge } from "./ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { useEffect } from "react";
+import { useState } from "react";
+
+const lowlight = createLowlight(all);
 
 const CustomTaskItem = TaskItem.extend({
   addNodeView() {
@@ -44,14 +45,16 @@ const CustomTaskItem = TaskItem.extend({
   },
 });
 
-interface TipTapProps{
-  content: any;
-  title: string;
-  titleChange: (title: string) => void;
-  onUpdate: (content: any) => void;
+interface TipTapProps {
+  initialContent: any;
+  initialTitle: string;
+  onTitleChange: (title: string) => void;
+  onContentUpdate: (content: any) => void;
+  onBlur?: () => void;
 }
 
-const Tiptap = ({title, content, titleChange, onUpdate} : TipTapProps) => {
+const Tiptap = ({ initialTitle, initialContent, onTitleChange, onContentUpdate, onBlur }: TipTapProps) => {
+  const [title, setTitle] = useState(initialTitle);
 
   const editor = useEditor({
     extensions: [
@@ -62,14 +65,10 @@ const Tiptap = ({title, content, titleChange, onUpdate} : TipTapProps) => {
       BulletList,
       OrderedList,
       TaskList,
-      CustomTaskItem.configure({
-        nested: true,
-      }),
-      Heading.configure({
-        levels: [1, 2],
-      }),
+      CustomTaskItem.configure({ nested: true }),
+      Heading.configure({ levels: [1, 2] }),
       CodeBlockLowlight.configure({
-        lowlight: createLowlight(all),
+        lowlight,
         enableTabIndentation: true,
         HTMLAttributes: {
           class: "rounded-lg bg-muted py-[0.75rem] px-[1rem] text-sm my-[1rem]",
@@ -81,26 +80,23 @@ const Tiptap = ({title, content, titleChange, onUpdate} : TipTapProps) => {
           class: "p-1 rounded-[0.4rem] px-[0.3rem] py-[0.1rem]",
         },
       }),
-      Placeholder.configure({
-        placeholder: "Start typing here...",
-      }),
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
+      Placeholder.configure({ placeholder: "Start typing here..." }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
-    content: "",
+    content: initialContent ?? "",
     onUpdate: ({ editor }) => {
-      onUpdate?.(editor.getJSON());
+      onContentUpdate(editor.getJSON());
+    },
+    onBlur: () => {
+      onBlur?.();
     },
   });
 
-  useEffect(() => {
-    if (editor && content && !editor.isDestroyed) {
-      if (editor.isEmpty) {
-        editor.commands.setContent(content);
-      }
-    }
-  }, [content, editor]);
+  const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    onTitleChange(newTitle);
+  };
 
   const { data: workspaces = [] } = useQuery({
     queryKey: ["workspaces"],
@@ -108,7 +104,7 @@ const Tiptap = ({title, content, titleChange, onUpdate} : TipTapProps) => {
       const res = await api.get("/workspaces");
       return res.data;
     },
-    enabled: false,
+    staleTime: 5 * 60_000,
   });
 
   return (
@@ -119,58 +115,60 @@ const Tiptap = ({title, content, titleChange, onUpdate} : TipTapProps) => {
             render={
               <Plus
                 size={18}
-                className="mb-2 outline-none transition-opacity duration-200 ease-in-out opacity-0 text-muted-foreground group-hover:opacity-100 "
+                className="mb-2 outline-none transition-opacity duration-200 ease-in-out opacity-0 text-muted-foreground group-hover:opacity-100"
                 strokeWidth={2}
               />
             }
           />
-          <PopoverContent align="start" className={" border border-border"}>
+          <PopoverContent align="start" className="border border-border">
             <PopoverHeader>
               <PopoverDescription>Your Workspaces</PopoverDescription>
             </PopoverHeader>
             <div className="flex flex-wrap gap-2">
-              {workspaces.map((workspace : {
-                id: string,
-                name: string, 
-                color: string
-              }) => (
-                <Badge
-                  key={workspace.id}
-                  variant={"outline"}
-                  className="cursor-pointer flex gap-1.5"
-                >
-                  <span className="size-1.5 rounded-full" style={{
-                    backgroundColor: workspace.color
-                  }} />
-                  {workspace.name}
-                </Badge>
-              ))}
+              {workspaces.map(
+                (workspace: { id: string; name: string; color: string }) => (
+                  <Badge
+                    key={workspace.id}
+                    variant="outline"
+                    className="cursor-pointer flex gap-1.5"
+                  >
+                    <span
+                      className="size-1.5 rounded-full"
+                      style={{ backgroundColor: workspace.color }}
+                    />
+                    {workspace.name}
+                  </Badge>
+                )
+              )}
             </div>
           </PopoverContent>
         </Popover>
+
         <textarea
           rows={1}
           value={title}
-          onChange={(e) => titleChange(e.target.value)}
-          className={
-            "w-full max-w-full resize-none overflow-hidden wrap-break-word text-[38px] font-bold outline-none field-sizing-content"
-          }
+          onChange={handleTitleChange}
+          className="w-full max-w-full resize-none overflow-hidden wrap-break-word text-[38px] font-bold outline-none field-sizing-content"
           name="title"
           placeholder="Title"
-        ></textarea>
+          onBlur={onBlur}
+        />
       </div>
+
       <MenuBar editor={editor} />
+
       <EditorContent
         className="
-    w-full min-w-0 max-w-full
-    [&_.ProseMirror]:min-h-60
-    [&_.ProseMirror]:max-w-full
-    [&_.ProseMirror]:wrap-break-word
-    [&_.ProseMirror]:whitespace-pre-wrap
-    [&_.ProseMirror]:outline-none
-    [&_.ProseMirror_*]:max-w-full
-  "
+          w-full min-w-0 max-w-full
+          [&_.ProseMirror]:min-h-60
+          [&_.ProseMirror]:max-w-full
+          [&_.ProseMirror]:wrap-break-word
+          [&_.ProseMirror]:whitespace-pre-wrap
+          [&_.ProseMirror]:outline-none
+          [&_.ProseMirror_*]:max-w-full
+        "
         editor={editor}
+        onBlur={onBlur}
       />
     </>
   );
@@ -181,19 +179,17 @@ function TaskItemView(props: NodeViewProps) {
     <NodeViewWrapper className="ml-2 flex items-center gap-2">
       <div contentEditable={false} className="my-2">
         <Checkbox
-          className={
-            "rounded-sm dark:bg-muted dark:text-primary dark:data-checked:border-violet-600 dark:data-checked:bg-violet-600"
-          }
+          className="rounded-sm dark:bg-muted dark:text-primary dark:data-checked:border-violet-600 dark:data-checked:bg-violet-600"
           checked={props.node.attrs.checked}
           onCheckedChange={(checked) => {
-            props.updateAttributes({
-              checked: !!checked,
-            });
+            props.updateAttributes({ checked: !!checked });
           }}
         />
       </div>
       <NodeViewContent
-        className={`ml-0.5 flex-1 ${props.node.attrs.checked ? "line-through text-muted-foreground" : ""}`}
+        className={`ml-0.5 flex-1 ${
+          props.node.attrs.checked ? "line-through text-muted-foreground" : ""
+        }`}
       />
     </NodeViewWrapper>
   );

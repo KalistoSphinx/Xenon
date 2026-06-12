@@ -10,7 +10,7 @@ import { api } from "@/lib/api";
 import { useUpdateNote } from "@/Repos/notesRepo";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Ellipsis, Star, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 export function EditorPage() {
@@ -82,13 +82,17 @@ export function EditorPage() {
     scheduleSave();
   };
 
-  const formattedDate = note?.createdAt
-    ? new Date(note.createdAt).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
-    : "Loading";
+  const formattedDate = useMemo(
+    () =>
+      note?.createdAt
+        ? new Date(note.createdAt).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        : "Loading",
+    [note?.createdAt],
+  );
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">

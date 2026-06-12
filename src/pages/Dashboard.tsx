@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,27 +6,38 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Outlet, useLocation } from "react-router"
-import {HugeiconsIcon} from "@hugeicons/react"
-import {LeftToRightListBulletIcon, WindowsNewIcon} from "@hugeicons/core-free-icons"
-import { useState } from "react"
+} from "@/components/ui/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Outlet, useLocation } from "react-router";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  LeftToRightListBulletIcon,
+  WindowsNewIcon,
+} from "@hugeicons/core-free-icons";
+import { useState } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { SearchIcon } from "lucide-react";
 
 export default function HomePage() {
-  
-  const location = useLocation()
-  const path = location.pathname
-  const isEditorRoute = path.startsWith("/dashboard/note/")
-  const name = path.split("/").pop()
-  const title = name?.charAt(0).toUpperCase() + name!.slice(1)
-  const [viewType, setViewType] = useState("cards")
+  const location = useLocation();
+  const path = location.pathname;
+  const isEditorRoute = path.startsWith("/dashboard/note/");
+  const name = path.split("/").pop();
+  const title = name?.charAt(0).toUpperCase() + name!.slice(1);
+  const [viewType, setViewType] = useState("cards");
+  const [inputValue, setInputValue] = useState("");
+  const searchQuery = useDebounce(inputValue, 300);
 
   return (
     <SidebarProvider>
@@ -44,26 +55,40 @@ export default function HomePage() {
                 <Breadcrumb>
                   <BreadcrumbList>
                     <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href="#">
-                        Dashboard
-                      </BreadcrumbLink>
+                      <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>  
+                    <BreadcrumbItem>
                       <BreadcrumbPage>{title}</BreadcrumbPage>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
+                <div className="ml-3">
+                  <InputGroup className="h-8 has-[[data-slot=input-group-control]:focus-visible]:ring-0">
+                    <InputGroupInput
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="Search..."
+                    />
+                    <InputGroupAddon>
+                      <SearchIcon />
+                    </InputGroupAddon>
+                  </InputGroup>
+                </div>
               </div>
               <div className="pr-4">
-                <Tabs defaultValue="cards" value={viewType} onValueChange={(val) => setViewType(val)}>
+                <Tabs
+                  defaultValue="cards"
+                  value={viewType}
+                  onValueChange={(val) => setViewType(val)}
+                >
                   <TabsList className="rounded-2xl">
                     <TabsTrigger value="cards">
-                      <HugeiconsIcon icon={WindowsNewIcon} /> 
+                      <HugeiconsIcon icon={WindowsNewIcon} />
                       {/* <span className="text-xs">Cards</span> */}
                     </TabsTrigger>
                     <TabsTrigger value="list">
-                      <HugeiconsIcon icon={LeftToRightListBulletIcon} /> 
+                      <HugeiconsIcon icon={LeftToRightListBulletIcon} />
                       {/* <span className="text-xs">List</span> */}
                     </TabsTrigger>
                     <TabsContent value="cards"></TabsContent>
@@ -75,8 +100,8 @@ export default function HomePage() {
             <Separator />
           </>
         )}
-        <Outlet context={viewType} />
+        <Outlet context={{viewType, searchQuery}} />
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

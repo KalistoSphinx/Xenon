@@ -16,7 +16,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "./ui/button";
 import { api } from "@/lib/api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {  useQuery } from "@tanstack/react-query";
 import { AddIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router";
 import { useCreateNote } from "@/Repos/notesRepo";

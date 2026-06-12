@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardAction,
@@ -70,16 +70,10 @@ export function NoteCard({
   index?: number;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [starred, setStarred] = useState(note.isStarred);
   const navigate = useNavigate();
   const updateNote = useUpdateNote();
 
-  useEffect(() => {
-    setStarred(note.isStarred);
-  }, [note.isStarred]);
-
   const handleUpdate = (id: string, value: boolean) => {
-    setStarred(value);
     updateNote.mutate({
       id: id,
       value: {
@@ -118,17 +112,19 @@ export function NoteCard({
           <StarIcon
             size={14}
             strokeWidth={2}
-            onClick={() => {
-              handleUpdate(note.id, !starred);
+            onClick={(e) => {
+              e.stopPropagation();
+              handleUpdate(note.id, !note.isStarred);
             }}
-            fill={starred ? "#fbbf24" : "none"}
-            stroke={starred ? "#fbbf24" : "currentColor"}
+            fill={note.isStarred ? "#fbbf24" : "none"}
+            stroke={note.isStarred ? "#fbbf24" : "currentColor"}
             className={
               "cursor-pointer transition-all duration-200 hover:scale-120"
             }
           />
           <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
             <DropdownMenuTrigger
+              onClick={(e) => e.stopPropagation()}
               render={
                 <span className="p-1 aria-expanded:bg-muted rounded-sm cursor-pointer" />
               }
@@ -136,12 +132,21 @@ export function NoteCard({
               <HugeiconsIcon size={18} icon={Ellipsis} strokeWidth={2} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-32">
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 <Pencil size={14} />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 <Trash2 size={14} />
                 Delete
               </DropdownMenuItem>

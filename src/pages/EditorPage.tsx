@@ -1,15 +1,8 @@
 import Tiptap from "@/components/tiptap";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { api } from "@/lib/api";
 import { useUpdateNote } from "@/Repos/notesRepo";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Ellipsis, Star, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -117,36 +110,6 @@ export function EditorPage() {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 text-muted-foreground">
-          <button
-            type="button"
-            className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Star note"
-          >
-            <Star size={17} strokeWidth={2} />
-          </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <button
-                  type="button"
-                  className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted"
-                  aria-label="More note actions"
-                />
-              }
-            >
-              <Ellipsis size={18} strokeWidth={2} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-36">
-              <DropdownMenuItem>Duplicate</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
-                <Trash2 size={14} />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </div>
 
       <div className="flex w-full justify-center px-4 py-16">
@@ -163,6 +126,7 @@ export function EditorPage() {
               key={id}
               initialTitle={note.title ?? ""}
               initialContent={note.content ?? null}
+              initialWorkspace={data?.workspaces?.id ? data.workspaces : null}
               onTitleChange={handleTitleChange}
               onContentUpdate={handleContentUpdate}
               onBlur={saveNow}

@@ -24,7 +24,7 @@ import {
 import Document from "@tiptap/extension-document";
 import { Checkbox } from "./ui/checkbox";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -33,9 +33,12 @@ import {
   PopoverTrigger,
 } from "./ui/popover";
 import { Badge } from "./ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useState } from "react";
+import { useUpdateNote } from "@/Repos/notesRepo";
+import { useParams } from "react-router";
+import type { Workspace } from "@/lib/models";
 
 const lowlight = createLowlight(all);
 
@@ -48,13 +51,28 @@ const CustomTaskItem = TaskItem.extend({
 interface TipTapProps {
   initialContent: any;
   initialTitle: string;
+  initialWorkspace?: Workspace | null;
   onTitleChange: (title: string) => void;
   onContentUpdate: (content: any) => void;
   onBlur?: () => void;
 }
 
-const Tiptap = ({ initialTitle, initialContent, onTitleChange, onContentUpdate, onBlur }: TipTapProps) => {
+const Tiptap = ({
+  initialTitle,
+  initialContent,
+  initialWorkspace,
+  onTitleChange,
+  onContentUpdate,
+  onBlur,
+}: TipTapProps) => {
   const [title, setTitle] = useState(initialTitle);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
+    initialWorkspace ?? null,
+  );
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const updateNote = useUpdateNote();
+  const queryClient = useQueryClient();
+  const { id: noteId } = useParams();
 
   const editor = useEditor({
     extensions: [
@@ -98,6 +116,36 @@ const Tiptap = ({ initialTitle, initialContent, onTitleChange, onContentUpdate, 
     onTitleChange(newTitle);
   };
 
+  const updateNotesListCache = (workspaceData: Workspace | null) => {
+    queryClient.setQueryData(["notes"], (old: any) => {
+      if (!Array.isArray(old)) return old;
+      return old.map((item: any) =>
+        item.notes?.id === noteId
+          ? { ...item, workspaces: workspaceData ?? {} }
+          : item,
+      );
+    });
+  };
+
+  const handleWorkspaceSelect = (workspace: Workspace) => {
+    setSelectedWorkspace(workspace);
+    setPopoverOpen(false);
+    updateNotesListCache(workspace);
+    updateNote.mutate({
+      id: noteId!,
+      value: { workspaceId: workspace.id },
+    });
+  };
+
+  const handleWorkspaceRemove = () => {
+    setSelectedWorkspace(null);
+    updateNotesListCache(null);
+    updateNote.mutate({
+      id: noteId!,
+      value: { workspaceId: null },
+    });
+  };
+
   const { data: workspaces = [] } = useQuery({
     queryKey: ["workspaces"],
     queryFn: async () => {
@@ -110,39 +158,73 @@ const Tiptap = ({ initialTitle, initialContent, onTitleChange, onContentUpdate, 
   return (
     <>
       <div className="group min-w-0">
-        <Popover>
-          <PopoverTrigger
-            render={
-              <Plus
-                size={18}
-                className="mb-2 outline-none transition-opacity duration-200 ease-in-out opacity-0 text-muted-foreground group-hover:opacity-100"
-                strokeWidth={2}
-              />
-            }
-          />
-          <PopoverContent align="start" className="border border-border">
-            <PopoverHeader>
-              <PopoverDescription>Your Workspaces</PopoverDescription>
-            </PopoverHeader>
-            <div className="flex flex-wrap gap-2">
-              {workspaces.map(
-                (workspace: { id: string; name: string; color: string }) => (
-                  <Badge
-                    key={workspace.id}
-                    variant="outline"
-                    className="cursor-pointer flex gap-1.5"
-                  >
-                    <span
-                      className="size-1.5 rounded-full"
-                      style={{ backgroundColor: workspace.color }}
-                    />
-                    {workspace.name}
-                  </Badge>
-                )
-              )}
+        <div className="mb-2 flex items-center gap-2">
+          {selectedWorkspace ? (
+            <div className="flex gap-1 group/badge w-full">
+              <Badge
+                variant="outline"
+                className="flex items-center gap-1.5"
+              >
+                <span
+                  className="size-1.5 rounded-full"
+                  style={{ backgroundColor: selectedWorkspace.color }}
+                />
+                <span className="text-xs">{selectedWorkspace.name}</span>
+              </Badge>
+              <button
+                type="button"
+                aria-label="Remove workspace"
+                className="opacity-0 group-hover/badge:opacity-100 rounded-sm text-muted-foreground transition-all duration-200 hover:text-foreground"
+                onClick={handleWorkspaceRemove}
+              >
+                <X size={11} strokeWidth={2.5} />
+              </button>
             </div>
-          </PopoverContent>
-        </Popover>
+          ) : (
+            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+              <PopoverTrigger
+                render={
+                  <Plus
+                    size={18}
+                    className={`outline-none transition-opacity duration-200 ease-in-out text-muted-foreground ${
+                      selectedWorkspace
+                        ? "opacity-0 group-hover:opacity-100"
+                        : "opacity-0 group-hover:opacity-100"
+                    }`}
+                    strokeWidth={2}
+                  />
+                }
+              />
+              <PopoverContent align="start" className="border border-border">
+                <PopoverHeader>
+                  <PopoverDescription>Your Workspaces</PopoverDescription>
+                </PopoverHeader>
+                <div className="flex flex-wrap gap-2">
+                  {workspaces.map(
+                    (workspace: {
+                      id: string;
+                      name: string;
+                      color: string;
+                    }) => (
+                      <Badge
+                        key={workspace.id}
+                        variant={"outline"}
+                        className="cursor-pointer flex gap-1.5"
+                        onClick={() => handleWorkspaceSelect(workspace)}
+                      >
+                        <span
+                          className="size-1.5 rounded-full"
+                          style={{ backgroundColor: workspace.color }}
+                        />
+                        {workspace.name}
+                      </Badge>
+                    ),
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
 
         <textarea
           rows={1}

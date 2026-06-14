@@ -10,13 +10,12 @@ export const useCreateNote = () =>
       return res.data;
     },
     onMutate: async (id, context) => {
-      // Seed the individual note cache so EditorPage renders instantly
-      // without showing a loading skeleton.
       const placeholderNote = {
         id,
         title: "",
         content: null,
         createdAt: new Date().toISOString(),
+        trashedAt: null
       };
       context.client.setQueryData(["notes", id], {
         notes: placeholderNote,
@@ -28,7 +27,6 @@ export const useCreateNote = () =>
         ...(old || []),
         { notes: newNote, workspaces: {} },
       ]);
-      // Update the individual note cache with the real server response
       context.client.setQueryData(["notes", newNote.id], {
         notes: newNote,
         workspaces: {},
@@ -85,3 +83,32 @@ export const useUpdateNote = () =>
       context.client.invalidateQueries({ queryKey: ["notes", variables.id] });
     },
   });
+
+  export const useDeleteNote = () => {
+    return useMutation({
+  mutationFn: async (id: string) => {
+    await api.delete(`/note/${id}`);
+  },
+  onMutate: async (deleteId, context) => {
+    await context.client.cancelQueries({ queryKey: ["notes"] });
+
+    const previousNotes = context.client.getQueryData(["notes"]);
+
+    context.client.setQueryData(["notes"], (old: any) => 
+      old.filter((item: any) => item.notes.id != deleteId)
+    )
+
+    return { previousNotes };
+  },
+  onError: (error, _, onMutateResult, context) => {
+    context.client.setQueryData(
+      ["notes"],
+      onMutateResult?.previousNotes,
+    );
+    console.log(error);
+  },
+  onSettled: (_data, _error, _variables, _onMutateResult, context) => {
+    context.client.invalidateQueries({ queryKey: ["notes"] });
+  },
+});
+}

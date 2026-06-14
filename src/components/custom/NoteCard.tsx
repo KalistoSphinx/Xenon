@@ -11,7 +11,7 @@ import {
 import { Separator } from "../ui/separator";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Ellipsis } from "@hugeicons/core-free-icons";
-import { StarIcon, Pencil, Trash2 } from "lucide-react";
+import { StarIcon, Pencil, Trash2, Undo, Trash2Icon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -19,9 +19,21 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
-import { useUpdateNote } from "@/Repos/notesRepo";
+import { useDeleteNote, useUpdateNote } from "@/Repos/notesRepo";
 import { useNavigate } from "react-router";
 import type { Note, Workspace } from "@/lib/models";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 
 function extractTextFromTiptap(node: any): string {
   if (!node) return "";
@@ -86,6 +98,8 @@ export function NoteCard({
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const updateNote = useUpdateNote();
+  const deleteNote = useDeleteNote();
+  const [deletedNote, setDeletedNote] = useState<Note | null>(null);
 
   const handleUpdate = (id: string, value: boolean) => {
     updateNote.mutate({
@@ -96,90 +110,186 @@ export function NoteCard({
     });
   };
 
+  const handleDelete = (id: string) => {
+    updateNote.mutate({
+      id: id,
+      value: {
+        trashedAt: new Date().toISOString(),
+      },
+    });
+
+    toast("Note Moved to trash", {
+      style: {
+        width: 250,
+        borderRadius: 30,
+        paddingInline: 25,
+      },
+      position: "bottom-center",
+      action: {
+        label: "Restore",
+        onClick: () => handleRestore(note.id),
+      },
+      actionButtonStyle: {
+        background: "none",
+        textDecoration: "underline",
+        textUnderlineOffset: "3px",
+        color: "white",
+      },
+    });
+  };
+
+  const handleRestore = (id: string) => {
+    updateNote.mutate({
+      id: id,
+      value: {
+        trashedAt: null,
+      },
+    });
+  };
+
   const preview = getPreview(note.content);
-  const noteCreation = getTimeAgo(new Date(note.createdAt))
+  const noteCreation = getTimeAgo(new Date(note.createdAt));
 
   return (
-    <Card
-      size="sm"
-      className="group animate-drop-in transition-all duration-200 ease-in-out hover:-translate-y-0.5"
-      style={{ animationDelay: `${index * 0.05}s` }}
-      onClick={() => navigate(`/dashboard/note/${note.id}`)}
-    >
-      <CardContent className="flex justify-between -mb-2">
-        <div
-          className="flex items-center gap-1.5"
-          style={{
-            color: workspace?.color || "var(--muted-foreground)",
-          }}
-        >
-          <span
-            className="size-1.5 rounded-full"
+    <>
+      <Card
+        size="sm"
+        className="group animate-drop-in transition-all duration-200 ease-in-out hover:-translate-y-0.5"
+        style={{ animationDelay: `${index * 0.05}s` }}
+        onClick={(e) => {
+          if (note.trashedAt) return e.preventDefault();
+
+          navigate(`/dashboard/note/${note.id}`);
+        }}
+      >
+        <CardContent className="flex justify-between -mb-2">
+          <div
+            className="flex items-center gap-1.5"
             style={{
-              backgroundColor: workspace?.color || "var(--muted-foreground)",
+              color: workspace?.color || "var(--muted-foreground)",
             }}
-          />
-          <p className="text-xs">{workspace?.name || "No workspace"}</p>
-        </div>
-        <CardAction
-          className={`flex items-center gap-2 text-muted-foreground transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-        >
-          <StarIcon
-            size={14}
-            strokeWidth={2}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleUpdate(note.id, !note.isStarred);
-            }}
-            fill={note.isStarred ? "#fbbf24" : "none"}
-            stroke={note.isStarred ? "#fbbf24" : "currentColor"}
-            className={
-              "cursor-pointer transition-all duration-200 hover:scale-120"
-            }
-          />
-          <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-            <DropdownMenuTrigger
-              onClick={(e) => e.stopPropagation()}
-              render={
-                <span className="p-1 aria-expanded:bg-muted rounded-sm cursor-pointer" />
+          >
+            <span
+              className="size-1.5 rounded-full"
+              style={{
+                backgroundColor: workspace?.color || "var(--muted-foreground)",
+              }}
+            />
+            <p className="text-xs">{workspace?.name || "No workspace"}</p>
+          </div>
+          <CardAction
+            className={`flex items-center gap-2 text-muted-foreground transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+          >
+            <StarIcon
+              size={14}
+              strokeWidth={2}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdate(note.id, !note.isStarred);
+              }}
+              fill={note.isStarred ? "#fbbf24" : "none"}
+              stroke={note.isStarred ? "#fbbf24" : "currentColor"}
+              className={
+                "cursor-pointer transition-all duration-200 hover:scale-120"
               }
+            />
+            <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+              <DropdownMenuTrigger
+                onClick={(e) => e.stopPropagation()}
+                render={
+                  <span className="p-1 aria-expanded:bg-muted rounded-sm cursor-pointer" />
+                }
+              >
+                <HugeiconsIcon size={18} icon={Ellipsis} strokeWidth={2} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-32">
+                {note.trashedAt ? (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRestore(note.id);
+                    }}
+                  >
+                    <Undo size={14} />
+                    Restore
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <Pencil size={14} />
+                    Edit
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    if (note.trashedAt) {
+                      return setDeletedNote(note);
+                    }
+
+                    handleDelete(note.id);
+                  }}
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </CardAction>
+        </CardContent>
+        <CardHeader>
+          <CardTitle className="text-sm">{note.title || "Untitled"}</CardTitle>
+          <CardDescription className="text-xs">
+            {preview || "No content"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent></CardContent>
+        <Separator />
+        <CardFooter>
+          <CardDescription className="text-[11px]">
+            {noteCreation}
+          </CardDescription>
+        </CardFooter>
+      </Card>
+
+      <AlertDialog
+        open={!!deletedNote}
+        onOpenChange={(open) => {
+          if (!open) setDeletedNote(null);
+        }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+              <Trash2Icon />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Delete Note?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the note and you will not be able to
+              recover it. Are you sure?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteNote.isPending}
+              onClick={() => {
+                deleteNote.mutate(deletedNote!.id)
+                setDeletedNote(null)
+              }}
+              variant="destructive"
             >
-              <HugeiconsIcon size={18} icon={Ellipsis} strokeWidth={2} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-32">
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                <Pencil size={14} />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                <Trash2 size={14} />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </CardAction>
-      </CardContent>
-      <CardHeader>
-        <CardTitle className="text-sm">{note.title || "Untitled"}</CardTitle>
-        <CardDescription className="text-xs">
-          {preview || "No content"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent></CardContent>
-      <Separator />
-      <CardFooter>
-        <CardDescription className="text-[11px]">{noteCreation}</CardDescription>
-      </CardFooter>
-    </Card>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

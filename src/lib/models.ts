@@ -3,7 +3,7 @@ export interface Note {
   content: any;
   id: string;
   isStarred: boolean;
-  isTrashed: boolean;
+  trashedAt: Date;
   createdAt: Date;
 }
 

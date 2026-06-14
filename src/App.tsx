@@ -1,5 +1,4 @@
 import { Outlet } from "react-router";
-import { Toaster } from "sonner";
 
 function App(){
   return(
@@ -15,7 +14,6 @@ function App(){
         <main className="flex flex-1 items-center justify-center overflow-y-auto w-full">
           <Outlet />
         </main>
-        <Toaster />
     </div>
   )
 }

@@ -9,24 +9,29 @@ import {
 } from "@/components/ui/empty";
 import { Note02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useOutletContext } from "react-router";
 import { useMemo } from "react";
 import { SearchX } from "lucide-react";
+import { api } from "@/lib/api";
 
 export function StarredNotes() {
   const { viewType, searchQuery } = useOutletContext<{
     viewType: string;
     searchQuery: string;
   }>();
-  const queryClient = useQueryClient();
 
-  const notes = queryClient
-    .getQueryData<any[]>(["notes"])?.filter((data: any) => data.notes.isStarred == true)
+  const { data: notes = [] } = useQuery({
+    queryKey: ["notes"],
+    queryFn: async () => {
+      const res = await api.get("/note");
+      return res.data;
+    },
+  });
 
   const filteredNotes = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return notes;
+    if (!query) return notes?.filter((data: any) => data.notes.isStarred);
 
     return notes?.filter((data: any) => {
       const title = (data.notes.title || "untitled").toLowerCase();

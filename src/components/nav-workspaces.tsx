@@ -166,7 +166,7 @@ export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
                 render={
                   <SidebarMenuAction
                     showOnHover
-                    className="aria-expanded:bg-muted"
+                    className="aria-expanded:bg-muted group-focus-within/menu-item:opacity-0 transition-opacity duration-200 ease-in-out"
                   />
                 }
               >

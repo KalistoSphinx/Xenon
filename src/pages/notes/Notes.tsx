@@ -28,7 +28,9 @@ export function AllNotes() {
 
   const filteredNotes = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return notes;
+    if (!query){
+      return notes.filter((data: any) => data.notes.trashedAt == null)
+    };
 
     return notes.filter((data: any) => {
       const title = (data.notes.title || "untitled").toLowerCase();
@@ -55,7 +57,7 @@ export function AllNotes() {
   }
 
   return isPending ? <div></div> :
-  notes.length == 0 ? (
+  filteredNotes.length == 0 ? (
       <div className="h-full flex flex-col items-center justify-center">
         <Empty>
       <EmptyHeader>

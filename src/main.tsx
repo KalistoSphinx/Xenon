@@ -21,6 +21,7 @@ import { TrashNotes } from "./pages/notes/Trash.tsx";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query"
 import { EditorPage } from "./pages/EditorPage.tsx";
 import { WorkspaceNotes } from "./pages/notes/WorkspaceNotes.tsx";
+import { Toaster } from "./components/ui/sonner.tsx";
 
 // @ts-ignore
 const router = createBrowserRouter(
@@ -53,6 +54,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Toaster />
     </QueryClientProvider>
   </StrictMode>,
 );

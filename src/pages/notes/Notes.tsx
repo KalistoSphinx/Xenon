@@ -54,8 +54,8 @@ export function AllNotes() {
     );
   }
 
-  return isPending ? <div></div> : viewType == "cards" ? (
-    filteredNotes.length == 0 ? (
+  return isPending ? <div></div> :
+  notes.length == 0 ? (
       <div className="h-full flex flex-col items-center justify-center">
         <Empty>
       <EmptyHeader>
@@ -70,7 +70,9 @@ export function AllNotes() {
       </EmptyHeader>
     </Empty>
       </div>
-    ) : (
+    ) :
+  viewType == "cards" ? (
+     (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-3">
         {filteredNotes.map((data: any, i: number) => <NoteCard key={data.notes.id} index={i} note={data.notes} workspace={data.workspaces}/>)}
       </div>

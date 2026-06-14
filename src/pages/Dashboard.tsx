@@ -28,13 +28,25 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { SearchIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function HomePage() {
   const location = useLocation();
   const path = location.pathname;
   const isEditorRoute = path.startsWith("/dashboard/note/");
-  const name = path.split("/").pop();
-  const title = name?.charAt(0).toUpperCase() + name!.slice(1);
+  const isWorkspaceRoute = path.startsWith("/dashboard/workspace/");
+  const segments = path.split("/");
+  const lastSegment = segments.pop() ?? "";
+  const queryClient = useQueryClient();
+  
+  const workspaceName = isWorkspaceRoute
+    ? (queryClient.getQueryData<{ id: string; name: string; color: string }[]>(["workspaces"])?.find(
+        (w) => w.id === lastSegment,
+      )?.name ?? "Workspace")
+    : null;
+
+  const title = workspaceName ?? (lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1));
+
   const [viewType, setViewType] = useState("cards");
   const [inputValue, setInputValue] = useState("");
   const searchQuery = useDebounce(inputValue, 300);

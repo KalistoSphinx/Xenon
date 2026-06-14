@@ -39,6 +39,7 @@ import { useState } from "react";
 import { Field, FieldError } from "./ui/field";
 import EditWorkspace from "./edit-workspace";
 import { useCreateWorkspace, useDeleteWorkspace } from "@/Repos/workspaceRepo";
+import { useLocation, useNavigate } from "react-router";
 
 interface Workspace {
   id: string;
@@ -58,6 +59,10 @@ export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
   );
   const createWorkspace = useCreateWorkspace();
   const deleteWorkspace = useDeleteWorkspace();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const path = location.pathname;
+  const workspace_id = path.split("/").pop() ?? "";
 
   const handleCreate = async () => {
     const name = workspaceName.trim();
@@ -145,7 +150,10 @@ export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
       <SidebarMenu>
         {workspaces.map((item) => (
           <SidebarMenuItem key={item.id}>
-            <SidebarMenuButton>
+            <SidebarMenuButton
+              isActive={item.id == workspace_id}
+              onClick={() => navigate(`/dashboard/workspace/${item.id}`)}
+            >
               <span
                 className="size-1.5 rounded-full"
                 style={{ backgroundColor: item.color }}

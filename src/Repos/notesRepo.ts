@@ -9,11 +9,30 @@ export const useCreateNote = () =>
       });
       return res.data;
     },
+    onMutate: async (id, context) => {
+      // Seed the individual note cache so EditorPage renders instantly
+      // without showing a loading skeleton.
+      const placeholderNote = {
+        id,
+        title: "",
+        content: null,
+        createdAt: new Date().toISOString(),
+      };
+      context.client.setQueryData(["notes", id], {
+        notes: placeholderNote,
+        workspaces: {},
+      });
+    },
     onSuccess: (newNote, _variables, _onMutateResult, context) => {
       context.client.setQueryData(["notes"], (old: any) => [
         ...(old || []),
         { notes: newNote, workspaces: {} },
       ]);
+      // Update the individual note cache with the real server response
+      context.client.setQueryData(["notes", newNote.id], {
+        notes: newNote,
+        workspaces: {},
+      });
     },
     onError: (error) => {
       console.log(error);

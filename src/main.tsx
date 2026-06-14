@@ -20,6 +20,7 @@ import { StarredNotes } from "./pages/notes/Starred.tsx";
 import { TrashNotes } from "./pages/notes/Trash.tsx";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query"
 import { EditorPage } from "./pages/EditorPage.tsx";
+import { WorkspaceNotes } from "./pages/notes/WorkspaceNotes.tsx";
 
 // @ts-ignore
 const router = createBrowserRouter(
@@ -39,6 +40,7 @@ const router = createBrowserRouter(
           <Route path="notes" element={<AllNotes />} />
           <Route path="starred" element={<StarredNotes />} />
           <Route path="trash" element={<TrashNotes />} />
+          <Route path="workspace/:id" element={<WorkspaceNotes />} />
         </Route>
       </Route>
     </>,

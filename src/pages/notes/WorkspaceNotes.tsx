@@ -10,19 +10,19 @@ import {
 import { Note02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useOutletContext } from "react-router";
-import { useMemo } from "react";
 import { SearchX } from "lucide-react";
+import { useMemo } from "react";
+import { useOutletContext, useParams } from "react-router";
 
-export function StarredNotes() {
+export function WorkspaceNotes() {
   const { viewType, searchQuery } = useOutletContext<{
     viewType: string;
     searchQuery: string;
   }>();
   const queryClient = useQueryClient();
+  const {id}  = useParams()
 
-  const notes = queryClient
-    .getQueryData<any[]>(["notes"])?.filter((data: any) => data.notes.isStarred == true)
+  const notes = queryClient.getQueryData<any[]>(["notes"])?.filter((data: any) => id == data.notes.workspaceId)
 
   const filteredNotes = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -34,7 +34,7 @@ export function StarredNotes() {
     });
   }, [notes, searchQuery]);
 
-  if (searchQuery && filteredNotes?.length === 0) {
+  if (searchQuery && filteredNotes!.length === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center">
         <Empty>
@@ -47,7 +47,7 @@ export function StarredNotes() {
             </EmptyMedia>
             <EmptyTitle>No results found</EmptyTitle>
             <EmptyDescription>
-              We couldn't find any starred notes matching "{searchQuery}".
+              We couldn't find any notes matching "{searchQuery}".
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -55,35 +55,37 @@ export function StarredNotes() {
     );
   }
 
-  return filteredNotes?.length == 0 ? (
-    <div className="h-full flex flex-col items-center justify-center">
-      <Empty>
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <HugeiconsIcon
-              className="size-5"
-              icon={Note02Icon}
-              strokeWidth={2}
-            />
-          </EmptyMedia>
-          <EmptyTitle>No Starred Notes Yet</EmptyTitle>
-          <EmptyDescription>
-            You haven&apos;t starred any notes yet. your first note.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    </div>
-  ) : viewType == "cards" ? (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-3">
-      {filteredNotes?.map((data: any, i: number) => (
-        <NoteCard
-          key={data.notes.id}
-          index={i}
-          note={data.notes}
-          workspace={data.workspaces}
-        />
-      ))}
-    </div>
+  return viewType == "cards" ? (
+    notes?.length == 0 ? (
+      <div className="h-full flex flex-col items-center justify-center">
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <HugeiconsIcon
+                className="size-5"
+                icon={Note02Icon}
+                strokeWidth={2}
+              />
+            </EmptyMedia>
+            <EmptyTitle>No notes in the workspace yet</EmptyTitle>
+            <EmptyDescription>
+              Add notes in your workspace for them to show up here
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </div>
+    ) : (
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-3">
+        {filteredNotes?.map((data: any, i: number) => (
+          <NoteCard
+            key={data.notes.id}
+            index={i}
+            note={data.notes}
+            workspace={data.workspaces}
+          />
+        ))}
+      </div>
+    )
   ) : (
     <div className="flex flex-col gap-4 p-4">
       {filteredNotes?.map((data: any, i: number) => (

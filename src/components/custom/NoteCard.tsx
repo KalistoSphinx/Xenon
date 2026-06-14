@@ -60,6 +60,20 @@ function getPreview(tiptapJson: any, maxLength = 150): string {
   return fullText.slice(0, maxLength).trimEnd() + "…";
 }
 
+function getTimeAgo(createdAt: Date) {
+  const diffMs = Date.now() - createdAt.getTime();
+
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+
+  return `${days}d ago`;
+}
+
 export function NoteCard({
   note,
   workspace,
@@ -83,6 +97,7 @@ export function NoteCard({
   };
 
   const preview = getPreview(note.content);
+  const noteCreation = getTimeAgo(new Date(note.createdAt))
 
   return (
     <Card
@@ -163,7 +178,7 @@ export function NoteCard({
       <CardContent></CardContent>
       <Separator />
       <CardFooter>
-        <CardDescription className="text-[11px]">2m ago</CardDescription>
+        <CardDescription className="text-[11px]">{noteCreation}</CardDescription>
       </CardFooter>
     </Card>
   );

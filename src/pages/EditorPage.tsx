@@ -16,7 +16,6 @@ export function EditorPage() {
   const titleRef = useRef("");
   const contentRef = useRef<any>(null);
   const isDirtyRef = useRef(false);
-  // Track which note id the refs currently belong to
   const loadedIdRef = useRef<string | undefined>(undefined);
 
   const { data, isLoading } = useQuery({

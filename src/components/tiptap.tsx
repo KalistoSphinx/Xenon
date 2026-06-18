@@ -12,7 +12,7 @@ import { Heading } from "@tiptap/extension-heading";
 import { MenuBar } from "./MenuBar";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
-import { all, createLowlight } from "lowlight";
+import { common, createLowlight } from "lowlight";
 import TextAlign from "@tiptap/extension-text-align";
 import Blockquote from "@tiptap/extension-blockquote";
 import {
@@ -24,7 +24,7 @@ import {
 import Document from "@tiptap/extension-document";
 import { Checkbox } from "./ui/checkbox";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Copy, Check } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -40,7 +40,13 @@ import { useUpdateNote } from "@/Repos/notesRepo";
 import { useParams } from "react-router";
 import type { Workspace } from "@/lib/models";
 
-const lowlight = createLowlight(all);
+const lowlight = createLowlight(common);
+
+const CustomCodeBlock = CodeBlockLowlight.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(CodeBlockView);
+  },
+});
 
 const CustomTaskItem = TaskItem.extend({
   addNodeView() {
@@ -85,12 +91,9 @@ const Tiptap = ({
       TaskList,
       CustomTaskItem.configure({ nested: true }),
       Heading.configure({ levels: [1, 2] }),
-      CodeBlockLowlight.configure({
+      CustomCodeBlock.configure({
         lowlight,
         enableTabIndentation: true,
-        HTMLAttributes: {
-          class: "rounded-lg bg-muted py-[0.75rem] px-[1rem] text-sm my-[1rem]",
-        },
       }),
       Highlight.configure({
         multicolor: true,
@@ -152,7 +155,6 @@ const Tiptap = ({
       const res = await api.get("/workspaces");
       return res.data;
     },
-    staleTime: 5 * 60_000,
   });
 
   return (
@@ -161,10 +163,7 @@ const Tiptap = ({
         <div className="mb-2 flex items-center gap-2">
           {selectedWorkspace ? (
             <div className="flex gap-1 group/badge w-full">
-              <Badge
-                variant="outline"
-                className="flex items-center gap-1.5"
-              >
+              <Badge variant="outline" className="flex items-center gap-1.5">
                 <span
                   className="size-1.5 rounded-full"
                   style={{ backgroundColor: selectedWorkspace.color }}
@@ -273,6 +272,38 @@ function TaskItemView(props: NodeViewProps) {
           props.node.attrs.checked ? "line-through text-muted-foreground" : ""
         }`}
       />
+    </NodeViewWrapper>
+  );
+}
+
+function CodeBlockView({ node }: NodeViewProps) {
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = () => {
+    const text = node.textContent;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <NodeViewWrapper className="relative rounded-lg bg-muted py-3 px-4 text-sm my-4">
+      <button
+        contentEditable={false}
+        onClick={copyToClipboard}
+        className="absolute top-2 right-2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted-foreground/20 transition-colors z-10"
+        title="Copy code"
+      >
+        {copied ? <Check size={14} /> : <Copy size={14} />}
+      </button>
+      <pre className="my-0! bg-transparent! p-0! overflow-x-auto">
+        {/* @ts-ignore */}
+        <NodeViewContent as="code"
+          className={
+            node.attrs.language ? `language-${node.attrs.language}` : ""
+          }
+        />
+      </pre>
     </NodeViewWrapper>
   );
 }

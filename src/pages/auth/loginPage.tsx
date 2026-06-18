@@ -8,13 +8,13 @@ import {
   FieldError
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Link, Navigate } from "react-router";
+import { Link } from "react-router";
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
+import { AlertCircleIcon } from "lucide-react"
 
 const formSchema = z.object({
   email: z.email("Invalid Email Address"),
@@ -27,6 +27,7 @@ export function LoginPage({
 }: React.ComponentProps<"form">) {
 
   const [loading, setLoading] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,40 +40,51 @@ export function LoginPage({
   async function onSubmit(formData: z.infer<typeof formSchema>) {
     try {
       setLoading(true)
+      setAuthError(null)
 
       const {error} = await authClient.signIn.email({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        callbackURL: "/dashboard"
       })
 
       if(error){
-        toast.warning(`${error.message}`, {position: "top-center"})
+        setAuthError(error.message || "An unexpected error occurred")
         return
       }
 
-      return <Navigate to="/dashboard" replace/>
 
     } catch (error) {
-      toast.warning(`${error}`, {position: "top-center"})
+      setAuthError(error instanceof Error ? error.message : String(error))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="max-w-xs w-full">
+    <div className="w-full">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn("flex flex-col gap-6", className)}
         {...props}
       >
         <FieldGroup>
-          <div className="flex flex-col items-center gap-1 text-center">
-            <h1 className="text-2xl font-bold">Login to your account</h1>
-            <p className="text-sm text-balance text-muted-foreground">
-              Enter your email below to login to your account
+          <div className="flex flex-col gap-2 mb-2">
+            <h1 className="text-3xl font-semibold tracking-tight mt-0! mb-0!">
+              Your knowledge,
+              <br />
+              organized.
+            </h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Sign in to your workspace and pick up where you left off.
             </p>
           </div>
+          {authError && (
+            <div className="flex items-center gap-2 p-3 text-[13px] font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+              <AlertCircleIcon size={16}/>
+              {authError}
+            </div>
+          )}
           <Controller
             name="email"
             control={form.control}
@@ -96,7 +108,15 @@ export function LoginPage({
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                <div className="flex items-center justify-between">
+                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <Link
+                    to="#"
+                    className="text-xs text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <Input
                   {...field}
                   id={field.name}
@@ -110,17 +130,17 @@ export function LoginPage({
             )}
           />
           <Field>
-            <Button type="submit">
+            <Button type="submit" className="w-full">
               {loading ? (
-                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
               ) : (
-                "Login"
+                "Sign in"
               )}
             </Button>
             <FieldDescription className="text-center">
               Don&apos;t have an account?{" "}
-              <Link to="signup" className="underline underline-offset-4">
-                Sign up
+              <Link to="signup" className="underline underline-offset-4 hover:text-foreground transition-colors">
+                Create one
               </Link>
             </FieldDescription>
           </Field>

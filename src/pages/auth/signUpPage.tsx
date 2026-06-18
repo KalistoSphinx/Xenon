@@ -15,6 +15,7 @@ import { Controller, useForm } from "react-hook-form";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { AlertCircleIcon } from "lucide-react";
 
 const formSchema = z
   .object({
@@ -33,6 +34,7 @@ export function SignUpPage({
   ...props
 }: React.ComponentProps<"form">) {
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,6 +49,7 @@ export function SignUpPage({
   async function onSubmit(formData: z.infer<typeof formSchema>) {
     try {
       setLoading(true);
+      setAuthError(null)
 
       const { error } = await authClient.signUp.email({
         name: formData.username,
@@ -55,32 +58,42 @@ export function SignUpPage({
       });
 
       if (error) {
-        toast.warning(`${error.message}`, { position: "top-center" });
+        setAuthError(error.message || "An unexpected error occurred")
         return;
       }
 
       toast.success("Signed up successfully", { position: "top-center" });
     } catch (error) {
-      toast.warning(`${error}`, { position: "top-center" });
+      setAuthError(error instanceof Error ? error.message : String(error))
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="max-w-xs w-full">
+    <div className="w-full">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn("flex flex-col gap-6", className)}
         {...props}
       >
         <FieldGroup>
-          <div className="flex flex-col items-center gap-1 text-center">
-            <h1 className="text-2xl font-bold">Create your account</h1>
-            <p className="text-sm text-balance text-muted-foreground">
-              Fill in the form below to create your account
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-semibold tracking-tight mt-0! mb-0!">
+              Start building your
+              <br />
+              second brain.
+            </h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Create an account to start writing without distractions.
             </p>
           </div>
+          {authError && (
+            <div className="flex items-center gap-2 p-3 text-[13px] font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+              <AlertCircleIcon size={16}/>
+              {authError}
+            </div>
+          )}
           <Controller
             name="username"
             control={form.control}
@@ -109,6 +122,7 @@ export function SignUpPage({
                   {...field}
                   id={field.name}
                   aria-invalid={fieldState.invalid}
+                  placeholder="m@example.com"
                   required
                 />
                 {fieldState.invalid && (
@@ -155,22 +169,22 @@ export function SignUpPage({
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
-                <FieldDescription>
-                  Please confirm your password.
-                </FieldDescription>
               </Field>
             )}
           />
           <Field>
-            <Button type="submit">
+            <Button type="submit" className="w-full">
               {loading ? (
-                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
               ) : (
-                "Create Account"
+                "Create account"
               )}
             </Button>
-            <FieldDescription className="px-6 text-center">
-              Already have an account? <Link to="/">Sign in</Link>
+            <FieldDescription className="text-center">
+              Already have an account?{" "}
+              <Link to="/" className="underline underline-offset-4 hover:text-foreground transition-colors">
+                Sign in
+              </Link>
             </FieldDescription>
           </Field>
         </FieldGroup>

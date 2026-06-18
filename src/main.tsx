@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "./App.tsx";
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -12,6 +11,7 @@ import {
 } from "react-router";
 import { LoginPage } from "./pages/auth/loginPage.tsx";
 import { SignUpPage } from "./pages/auth/signUpPage.tsx";
+import { AuthLayout } from "./pages/auth/AuthLayout.tsx";
 import { ProtectedRoute } from "./routes/protectedRoute.tsx";
 import HomePage from "./pages/Dashboard.tsx";
 import { UnauthorizedRoute } from "./routes/UnauthorizedRoute.tsx";
@@ -27,8 +27,8 @@ import { Toaster } from "./components/ui/sonner.tsx";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<App />}>
-        <Route element={<UnauthorizedRoute />}>
+      <Route path="/" element={<UnauthorizedRoute />}>
+        <Route element={<AuthLayout />}>
           <Route path="" element={<LoginPage />} />
           <Route path="signup" element={<SignUpPage />} />
         </Route>
@@ -48,7 +48,13 @@ const router = createBrowserRouter(
   ),
 );
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

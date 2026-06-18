@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardAction,
@@ -11,7 +12,7 @@ import {
 import { Separator } from "../ui/separator";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Ellipsis } from "@hugeicons/core-free-icons";
-import { StarIcon, Pencil, Trash2, Undo, Trash2Icon } from "lucide-react";
+import { StarIcon, Trash2, Undo, Trash2Icon, Copy } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -19,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
-import { useDeleteNote, useUpdateNote } from "@/Repos/notesRepo";
+import { useDeleteNote, useUpdateNote, useCreateNote } from "@/Repos/notesRepo";
 import { useNavigate } from "react-router";
 import type { Note, Workspace } from "@/lib/models";
 import { toast } from "sonner";
@@ -99,7 +100,43 @@ export function NoteCard({
   const navigate = useNavigate();
   const updateNote = useUpdateNote();
   const deleteNote = useDeleteNote();
+  const createNote = useCreateNote();
+  const queryClient = useQueryClient();
   const [deletedNote, setDeletedNote] = useState<Note | null>(null);
+
+  const handleDuplicate = () => {
+    const newId = crypto.randomUUID();
+    createNote.mutate(newId, {
+      onSuccess: () => {
+        updateNote.mutate({
+          id: newId,
+          value: {
+            title: note.title ? `${note.title} (Copy)` : "Untitled (Copy)",
+            content: note.content,
+            workspaceId: workspace?.id || null,
+            isStarred: note.isStarred,
+          },
+        });
+
+        if (workspace?.id) {
+          queryClient.setQueryData(["notes", newId], (old: any) => {
+            if (!old) return old;
+            return { ...old, workspaces: workspace };
+          });
+          queryClient.setQueryData(["notes"], (old: any) => {
+            if (!Array.isArray(old)) return old;
+            return old.map((item: any) =>
+              item.notes?.id === newId ? { ...item, workspaces: workspace } : item
+            );
+          });
+        }
+        setIsOpen(false);
+      },
+      onError: () => {
+        toast.error("Failed to duplicate note", { position: "bottom-center" });
+      }
+    });
+  };
 
   const handleUpdate = (id: string, value: boolean) => {
     updateNote.mutate({
@@ -217,10 +254,11 @@ export function NoteCard({
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
+                      handleDuplicate();
                     }}
                   >
-                    <Pencil size={14} />
-                    Edit
+                    <Copy size={14} />
+                    Duplicate
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />

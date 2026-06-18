@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, Warning } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useOutletContext } from "react-router";
@@ -41,7 +41,7 @@ export function TrashNotes() {
 
   if (searchQuery && filteredNotes?.length === 0) {
     return (
-      <div className="h-full flex flex-col items-center justify-center">
+      <div className="relative flex flex-col items-center justify-center">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -60,7 +60,9 @@ export function TrashNotes() {
     );
   }
 
-  return filteredNotes?.length == 0 ? (
+  return (
+    <>
+      {filteredNotes?.length == 0 ? (
     <div className="h-full flex flex-col items-center justify-center">
       <Empty>
         <EmptyHeader>
@@ -100,5 +102,14 @@ export function TrashNotes() {
         />
       ))}
     </div>
-  );
+  )}
+
+      <div className="sticky bottom-6 z-10 mx-auto mt-auto mb-6 px-4 py-2.5 rounded-lg w-fit text-sm bg-background/95 backdrop-blur-md border shadow-sm">
+        <span className="flex items-center gap-2 font-medium">
+          <HugeiconsIcon icon={Warning} size={16} className="text-muted-foreground" />
+          Trashed Notes are permanently deleted after 30 days.
+        </span>
+      </div>
+    </>
+  )
 }

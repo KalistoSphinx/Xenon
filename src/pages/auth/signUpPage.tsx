@@ -55,6 +55,7 @@ export function SignUpPage({
         name: formData.username,
         email: formData.email,
         password: formData.password,
+        callbackURL: "http://localhost:5173/dashboard"
       });
 
       if (error) {
@@ -62,7 +63,7 @@ export function SignUpPage({
         return;
       }
 
-      toast.success("Signed up successfully", { position: "top-center" });
+      toast.success("Check your email and verify your account", { position: "top-center" });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : String(error))
     } finally {
@@ -88,6 +89,7 @@ export function SignUpPage({
               Create an account to start writing without distractions.
             </p>
           </div>
+          {}
           {authError && (
             <div className="flex items-center gap-2 p-3 text-[13px] font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
               <AlertCircleIcon size={16}/>

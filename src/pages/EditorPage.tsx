@@ -1,4 +1,5 @@
 import Tiptap from "@/components/tiptap";
+import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { useUpdateNote } from "@/Repos/notesRepo";
 import { useQuery } from "@tanstack/react-query";
@@ -114,11 +115,11 @@ export function EditorPage() {
       <div className="flex w-full justify-center px-4 py-16">
         <div className="flex w-full max-w-3xl min-w-0 flex-col gap-4">
           {isLoading || !note ? (
-            <div className="flex flex-col gap-4 animate-pulse">
-              <div className="h-10 w-2/3 rounded-md bg-muted" />
-              <div className="h-4 w-full rounded-md bg-muted" />
-              <div className="h-4 w-5/6 rounded-md bg-muted" />
-              <div className="h-4 w-4/6 rounded-md bg-muted" />
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-4 w-20 rounded-full"/>
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="mt-4 h-12 w-full" />
+              <Skeleton className="mt-3 h-60 w-full" />
             </div>
           ) : (
             <Tiptap

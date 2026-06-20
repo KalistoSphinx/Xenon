@@ -53,7 +53,7 @@ export function SignUpPage({
         callbackURL: "http://localhost:5173/dashboard"
       }, {
         onSuccess: () => {
-          return navigate("/verifyEmail", {state: {email: formData.email}})
+          return navigate(`/verifyEmail?email=${encodeURIComponent(formData.email)}`)
         }
       });
 

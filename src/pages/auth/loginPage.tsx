@@ -121,7 +121,7 @@ export function LoginPage({
                   />
                   <div className="flex justify-end">
                     <Link
-                    to="#"
+                    to="/forgot-password"
                     className="text-xs text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
                   >
                     Forgot password?
@@ -136,7 +136,7 @@ export function LoginPage({
           </div>
 
           <Field>
-            <Button type="submit" className="w-full ">
+            <Button type="submit" className="w-full">
               {loading ? (
                 <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
               ) : (

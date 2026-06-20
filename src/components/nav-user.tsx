@@ -28,15 +28,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Field, FieldError } from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   LogoutIcon,
   UserCircle02Icon,
+  LockPasswordIcon,
 } from "@hugeicons/core-free-icons";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-
-import { EllipsisVertical } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  EllipsisVertical,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  Circle,
+  AlertCircleIcon,
+} from "lucide-react";
 
 export function NavUser({
   user,
@@ -51,6 +65,100 @@ export function NavUser({
   const [newName, setNewName] = useState(user.name);
   const [nameError, setNameError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const passwordRequirements = [
+    { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
+    { label: "Uppercase letter (A-Z)", test: (v: string) => /[A-Z]/.test(v) },
+    { label: "Lowercase letter (a-z)", test: (v: string) => /[a-z]/.test(v) },
+    { label: "Number (0-9)", test: (v: string) => /[0-9]/.test(v) },
+    {
+      label: "Special character (!@#$%^&*...)",
+      test: (v: string) => /[^A-Za-z0-9]/.test(v),
+    },
+  ];
+
+  function handleOpenChangePassword() {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordError("");
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setChangePasswordOpen(true);
+  }
+
+  async function handleChangePassword() {
+    // Validate current password
+    if (!currentPassword) {
+      setPasswordError("Current password is required");
+      return;
+    }
+
+    // Validate new password requirements
+    const allPassed = passwordRequirements.every((r) => r.test(newPassword));
+    if (!allPassed) {
+      setPasswordError("New password does not meet all requirements");
+      return;
+    }
+
+    // Validate confirm password
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+
+    // Validate not same as current
+    if (currentPassword === newPassword) {
+      setPasswordError("New password must be different from current password");
+      return;
+    }
+
+    setPasswordError("");
+    setIsChangingPassword(true);
+
+    try {
+      const { error } = await authClient.changePassword({
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      });
+
+      if (error) {
+        setPasswordError(error.message || "Failed to change password");
+      } else {
+        toast.success("Password changed successfully", {
+          position: "bottom-center",
+        });
+        setChangePasswordOpen(false);
+      }
+    } catch {
+      setPasswordError("Something went wrong");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  }
+
+  const passedCount = passwordRequirements.filter((r) =>
+    r.test(newPassword)
+  ).length;
+  const totalReqs = passwordRequirements.length;
+
+  const getBarColor = () => {
+    if (passedCount === 0) return "bg-muted";
+    if (passedCount <= 2) return "bg-destructive";
+    if (passedCount <= 3) return "bg-amber-500";
+    if (passedCount <= 4) return "bg-yellow-500";
+    return "bg-emerald-500";
+  };
 
   async function logOutUser() {
     await authClient.signOut();
@@ -224,6 +332,177 @@ export function NavUser({
               disabled={isSaving}
             >
               {isSaving ? "Saving…" : "Save"}
+            </Button>
+
+            <div className="relative flex items-center my-1">
+              <div className="flex-1 border-t border-border" />
+              <span className="px-3 text-xs text-muted-foreground">or</span>
+              <div className="flex-1 border-t border-border" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleOpenChangePassword}
+            >
+              <HugeiconsIcon icon={LockPasswordIcon} strokeWidth={2} className="mr-2 size-4" />
+              Change Password
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+        <DialogContent className="pt-0">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Enter your current password and choose a new one.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4">
+            {passwordError && (
+              <div className="flex items-center gap-2 p-3 text-[13px] font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                <AlertCircleIcon size={16} />
+                {passwordError}
+              </div>
+            )}
+
+            <Field className="flex flex-col gap-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <InputGroup className="h-10">
+                <InputGroupInput
+                  id="current-password"
+                  type={showCurrentPassword ? "text" : "password"}
+                  placeholder="Enter current password"
+                  className="px-4 py-2.5"
+                  value={currentPassword}
+                  onChange={(e) => {
+                    setCurrentPassword(e.target.value);
+                    if (passwordError) setPasswordError("");
+                  }}
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  >
+                    {showCurrentPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
+            </Field>
+
+            <Field className="flex flex-col gap-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <InputGroup className="h-10">
+                <InputGroupInput
+                  id="new-password"
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder="Enter new password"
+                  className="px-4 py-2.5"
+                  value={newPassword}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    if (passwordError) setPasswordError("");
+                  }}
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
+
+              {/* Password strength bar */}
+              <div className="flex flex-col gap-2.5 mt-0.5">
+                <div className="flex gap-1">
+                  {Array.from({ length: totalReqs }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "h-1 flex-1 rounded-full transition-colors duration-300",
+                        i < passedCount ? getBarColor() : "bg-muted"
+                      )}
+                    />
+                  ))}
+                </div>
+                <ul className="flex flex-col gap-1">
+                  {passwordRequirements.map((req) => {
+                    const passed = req.test(newPassword);
+                    return (
+                      <li
+                        key={req.label}
+                        className={cn(
+                          "flex items-center gap-2 text-xs transition-colors duration-200",
+                          passed
+                            ? "text-emerald-500"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {passed ? (
+                          <CheckCircle2 className="size-3" />
+                        ) : (
+                          <Circle className="size-3" />
+                        )}
+                        {req.label}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </Field>
+
+            <Field className="flex flex-col gap-2">
+              <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+              <InputGroup className="h-10">
+                <InputGroupInput
+                  id="confirm-new-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  className="px-4 py-2.5"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (passwordError) setPasswordError("");
+                  }}
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton
+                    onClick={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
+              {confirmPassword && newPassword !== confirmPassword && (
+                <FieldError>Passwords do not match</FieldError>
+              )}
+            </Field>
+
+            <Button
+              className="w-full"
+              onClick={handleChangePassword}
+              disabled={isChangingPassword}
+            >
+              {isChangingPassword ? "Changing…" : "Change Password"}
             </Button>
           </div>
         </DialogContent>

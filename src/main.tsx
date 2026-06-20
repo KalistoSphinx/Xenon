@@ -23,6 +23,8 @@ import { EditorPage } from "./pages/EditorPage.tsx";
 import { WorkspaceNotes } from "./pages/notes/WorkspaceNotes.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 import { VerifyEmail } from "./pages/auth/verifyEmail.tsx";
+import { ForgotPassword } from "./pages/auth/forgotPassword.tsx";
+import { ResetPassword } from "./pages/auth/resetPassword.tsx";
 
 // @ts-ignore
 const router = createBrowserRouter(
@@ -33,6 +35,8 @@ const router = createBrowserRouter(
           <Route path="" element={<LoginPage />} />
           <Route path="signup" element={<SignUpPage />} />
           <Route path="verifyEmail" element={<VerifyEmail />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
         </Route>
       </Route>
 

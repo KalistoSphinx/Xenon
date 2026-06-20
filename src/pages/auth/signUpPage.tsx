@@ -5,29 +5,23 @@ import {
   FieldDescription,
   FieldGroup,
   FieldError,
-  FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
 import { useState } from "react";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, Eye, EyeOff } from "lucide-react";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 
 const formSchema = z
   .object({
     username: z.string().min(5, "Username too short"),
     email: z.email("Invalid Email Address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
   })
-  .refine((data) => data.password == data.confirmPassword, {
-    error: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
 
 export function SignUpPage({
   className,
@@ -35,6 +29,8 @@ export function SignUpPage({
 }: React.ComponentProps<"form">) {
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,7 +38,6 @@ export function SignUpPage({
       username: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
@@ -56,6 +51,10 @@ export function SignUpPage({
         email: formData.email,
         password: formData.password,
         callbackURL: "http://localhost:5173/dashboard"
+      }, {
+        onSuccess: () => {
+          return navigate("/verifyEmail", {state: {email: formData.email}})
+        }
       });
 
       if (error) {
@@ -63,7 +62,6 @@ export function SignUpPage({
         return;
       }
 
-      toast.success("Check your email and verify your account", { position: "top-center" });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : String(error))
     } finally {
@@ -96,16 +94,18 @@ export function SignUpPage({
               {authError}
             </div>
           )}
-          <Controller
+          <div className="flex flex-col gap-4.5">
+            <Controller
             name="username"
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Username</FieldLabel>
                 <Input
                   {...field}
                   id={field.name}
                   aria-invalid={fieldState.invalid}
+                  placeholder="Username"
+                  className=" h-10 px-4 py-2.5"
                   required
                 />
                 {fieldState.invalid && (
@@ -119,12 +119,12 @@ export function SignUpPage({
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                 <Input
                   {...field}
                   id={field.name}
                   aria-invalid={fieldState.invalid}
-                  placeholder="m@example.com"
+                  placeholder="Email"
+                  className=" h-10 px-4 py-2.5"
                   required
                 />
                 {fieldState.invalid && (
@@ -138,14 +138,22 @@ export function SignUpPage({
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                <Input
+                <InputGroup className="h-10">
+                  <InputGroupInput
                   {...field}
                   id={field.name}
-                  type="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  className="px-4 py-2.5"
                   aria-invalid={fieldState.invalid}
                   required
                 />
+                <InputGroupAddon align={"inline-end"}>
+                  <InputGroupButton onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </InputGroupButton>
+                </InputGroupAddon>
+                </InputGroup>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -155,25 +163,7 @@ export function SignUpPage({
               </Field>
             )}
           />
-          <Controller
-            name="confirmPassword"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Confirm Password</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  type="password"
-                  aria-invalid={fieldState.invalid}
-                  required
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
+          </div>
           <Field>
             <Button type="submit" className="w-full">
               {loading ? (

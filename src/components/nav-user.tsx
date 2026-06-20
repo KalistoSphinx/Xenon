@@ -188,7 +188,7 @@ export function NavUser({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               <Label htmlFor="account-email">Email</Label>
               <Input
                 id="account-email"
@@ -201,7 +201,7 @@ export function NavUser({
 
             <Field
               data-invalid={!!nameError}
-              className="flex flex-col gap-1.5"
+              className="flex flex-col gap-3"
             >
               <Label htmlFor="account-name">Name</Label>
               <Input
@@ -213,9 +213,6 @@ export function NavUser({
                 onChange={(e) => {
                   setNewName(e.target.value);
                   if (nameError) setNameError("");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSaveName();
                 }}
               />
               {nameError && <FieldError>{nameError}</FieldError>}

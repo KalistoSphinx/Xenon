@@ -22,6 +22,7 @@ import {QueryClient, QueryClientProvider} from "@tanstack/react-query"
 import { EditorPage } from "./pages/EditorPage.tsx";
 import { WorkspaceNotes } from "./pages/notes/WorkspaceNotes.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
+import { VerifyEmail } from "./pages/auth/verifyEmail.tsx";
 
 // @ts-ignore
 const router = createBrowserRouter(
@@ -31,6 +32,7 @@ const router = createBrowserRouter(
         <Route element={<AuthLayout />}>
           <Route path="" element={<LoginPage />} />
           <Route path="signup" element={<SignUpPage />} />
+          <Route path="verifyEmail" element={<VerifyEmail />} />
         </Route>
       </Route>
 

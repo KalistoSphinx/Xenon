@@ -5,5 +5,5 @@ export const authClient = createAuthClient({
     refetchOnWindowFocus: false,
     refetchWhenOffline: false,
   },
-  baseURL: "http://localhost:3000",
+  baseURL: import.meta.env.VITE_BACKEND_URL,
 });

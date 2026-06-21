@@ -50,7 +50,7 @@ export function SignUpPage({
         name: formData.username,
         email: formData.email,
         password: formData.password,
-        callbackURL: "http://localhost:5173/dashboard"
+        callbackURL: `${import.meta.env.VITE_FRONTEND_URL}/dashboard`
       }, {
         onSuccess: () => {
           return navigate(`/verifyEmail?email=${encodeURIComponent(formData.email)}`)

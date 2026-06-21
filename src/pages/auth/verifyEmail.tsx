@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { Mail } from "@hugeicons/core-free-icons";
 import { MailCheck } from "lucide-react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -11,7 +10,7 @@ export function VerifyEmail() {
     try {
       await authClient.sendVerificationEmail({
         email: email,
-        callbackURL: "http://localhost:5173/dashboard"
+        callbackURL: `${import.meta.env.VITE_FRONTEND_URL}/dashboard`
       })
 
       toast.success("Email sent successfully", {position: "top-center"})

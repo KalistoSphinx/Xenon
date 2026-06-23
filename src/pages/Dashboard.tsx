@@ -5,11 +5,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Outlet, useLocation } from "react-router";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  LeftToRightListBulletIcon,
-  WindowsNewIcon,
-} from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
@@ -17,7 +12,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { SearchIcon } from "lucide-react";
+import { LayoutGrid, List, SearchIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function HomePage() {
@@ -71,10 +66,10 @@ export default function HomePage() {
                 >
                   <TabsList className="rounded-[8px]">
                     <TabsTrigger value="cards" className={"rounded-[6px] border-0 shadow-xs dark:data-active:bg-black"}>
-                      <HugeiconsIcon icon={WindowsNewIcon} />
+                      <LayoutGrid  strokeWidth={2.2} />
                     </TabsTrigger>
                     <TabsTrigger value="list" className={"rounded-[6px] border-0 shadow-xs dark:data-active:bg-black"}>
-                      <HugeiconsIcon icon={LeftToRightListBulletIcon} />
+                      <List className="size-3.75" strokeWidth={2.2} />
                     </TabsTrigger>
                     <TabsContent value="cards"></TabsContent>
                     <TabsContent value="list"></TabsContent>

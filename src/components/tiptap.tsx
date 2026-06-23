@@ -58,7 +58,6 @@ interface TipTapProps {
   initialContent: any;
   initialTitle: string;
   initialWorkspace?: Workspace | null;
-  onTitleChange: (title: string) => void;
   onContentUpdate: (content: any) => void;
   onBlur?: () => void;
 }
@@ -67,7 +66,6 @@ const Tiptap = ({
   initialTitle,
   initialContent,
   initialWorkspace,
-  onTitleChange,
   onContentUpdate,
   onBlur,
 }: TipTapProps) => {
@@ -116,7 +114,6 @@ const Tiptap = ({
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
-    onTitleChange(newTitle);
   };
 
   const updateNotesListCache = (workspaceData: Workspace | null) => {

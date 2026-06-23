@@ -18,19 +18,19 @@ export function NavMain() {
       <SidebarMenu>
         
         <SidebarMenuItem key={"notes"}>
-          <SidebarMenuButton isActive={path == "/dashboard/notes" || path == "/dashboard"} render={<Link to="notes" />}>
+          <SidebarMenuButton className="text-sidebar-foreground/70" isActive={path == "/dashboard/notes" || path == "/dashboard"} render={<Link to="notes" />}>
             <HugeiconsIcon icon={Note02Icon} strokeWidth={2}/> <span>Notes</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
 
         <SidebarMenuItem key={"starred"}>
-          <SidebarMenuButton isActive={path == "/dashboard/starred" } render={<Link to="starred" />}>
+          <SidebarMenuButton className="text-sidebar-foreground/70" isActive={path == "/dashboard/starred" } render={<Link to="starred" />}>
             <HugeiconsIcon icon={StarIcon} strokeWidth={2}/> <span>Starred</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
 
         <SidebarMenuItem key={"trash"}>
-          <SidebarMenuButton isActive={path == "/dashboard/trash"} render={<Link to="trash" />}>
+          <SidebarMenuButton className="text-sidebar-foreground/70" isActive={path == "/dashboard/trash"} render={<Link to="trash" />}>
             <HugeiconsIcon icon={Delete02Icon} strokeWidth={2}/> <span>Trash</span>
           </SidebarMenuButton>
         </SidebarMenuItem>

@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Separator } from "../ui/separator";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Ellipsis } from "@hugeicons/core-free-icons";
 import { StarIcon, Trash2, Undo, Trash2Icon, Copy } from "lucide-react";
@@ -191,7 +190,7 @@ export function NoteCard({
     <>
       <Card
         size="sm"
-        className="group animate-drop-in transition-all duration-200 ease-in-out hover:-translate-y-0.5"
+        className="group h-full animate-drop-in transition-all duration-200 ease-in-out hover:-translate-y-0.5"
         style={{ animationDelay: `${index * 0.05}s` }}
         onClick={(e) => {
           if (note.trashedAt) return e.preventDefault();
@@ -281,15 +280,13 @@ export function NoteCard({
             </DropdownMenu>
           </CardAction>
         </CardContent>
-        <CardHeader>
+        <CardHeader className="flex-1">
           <CardTitle className="text-sm">{note.title || "Untitled"}</CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="line-clamp-3 min-h-15.5 text-xs leading-4">
             {preview || "No content"}
           </CardDescription>
         </CardHeader>
-        <CardContent></CardContent>
-        <Separator />
-        <CardFooter>
+        <CardFooter className="mt-auto">
           <CardDescription className="text-[11px]">
             {noteCreation}
           </CardDescription>

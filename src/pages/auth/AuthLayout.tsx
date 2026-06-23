@@ -90,7 +90,7 @@ export function AuthLayout() {
         </div>
       </div>
 
-      <div className="hidden lg:flex w-[45%] shrink-0 border-l border-border bg-cover bg-[url('./assets/images/graphic.png')]">
+      <div className="hidden lg:flex w-[45%] shrink-0 border-l border-border bg-cover bg-[url('/images/graphic.png')]">
         <RightPanel />
       </div>
     </div>

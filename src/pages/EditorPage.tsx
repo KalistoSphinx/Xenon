@@ -3,8 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { useUpdateNote } from "@/Repos/notesRepo";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 
 export function EditorPage() {
@@ -12,7 +13,6 @@ export function EditorPage() {
   const { id } = useParams();
   const updateNote = useUpdateNote();
 
-  const [title, setTitle] = useState("");
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleRef = useRef("");
   const contentRef = useRef<any>(null);
@@ -34,9 +34,7 @@ export function EditorPage() {
     if (loadedIdRef.current !== id) {
       loadedIdRef.current = id;
       isDirtyRef.current = false;
-      titleRef.current = note.title ?? "";
       contentRef.current = note.content ?? null;
-      setTitle(note.title ?? "");
     }
   }, [note, id]);
 
@@ -45,7 +43,7 @@ export function EditorPage() {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     updateNote.mutate({
       id: id as string,
-      value: { title: titleRef.current, content: contentRef.current },
+      value: { content: contentRef.current },
     });
     isDirtyRef.current = false;
   };
@@ -61,13 +59,6 @@ export function EditorPage() {
       saveNow();
     };
   }, [id]);
-
-  const handleTitleChange = (newTitle: string) => {
-    titleRef.current = newTitle;
-    isDirtyRef.current = true;
-    setTitle(newTitle);
-    scheduleSave();
-  };
 
   const handleContentUpdate = (newContent: any) => {
     contentRef.current = newContent;
@@ -89,7 +80,7 @@ export function EditorPage() {
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
-      <div className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+      <div className="flex h-14 shrink-0 items-center justify-between px-4">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
@@ -102,17 +93,29 @@ export function EditorPage() {
           >
             <ArrowLeft size={18} strokeWidth={2} />
           </button>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium">
-              {title || "Untitled"}
-            </p>
-            <p className="text-xs text-muted-foreground">{formattedDate}</p>
-          </div>
         </div>
 
+        {!isLoading && note && (
+          <TooltipProvider delay={200}>
+            <Tooltip>
+              <TooltipTrigger>
+                <button
+                  type="button"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label="Note info"
+                >
+                  <Info size={16} strokeWidth={2} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="end" className="text-xs">
+                Created on {formattedDate}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
 
-      <div className="flex w-full justify-center px-4 py-16">
+      <div className="flex w-full justify-center px-4 py-12">
         <div className="flex w-full max-w-3xl min-w-0 flex-col gap-4">
           {isLoading || !note ? (
             <div className="flex flex-col gap-4">
@@ -122,16 +125,18 @@ export function EditorPage() {
               <Skeleton className="mt-3 h-60 w-full" />
             </div>
           ) : (
-            <Tiptap
+            <>
+              <Tiptap
               key={id}
               initialTitle={note.title ?? ""}
               initialContent={note.content ?? null}
               initialWorkspace={data?.workspaces?.id ? data.workspaces : null}
-              onTitleChange={handleTitleChange}
               onContentUpdate={handleContentUpdate}
               onBlur={saveNow}
             />
+            </>
           )}
+
         </div>
       </div>
     </div>

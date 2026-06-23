@@ -42,13 +42,10 @@ import {
 } from "@hugeicons/core-free-icons";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import {
   EllipsisVertical,
   Eye,
   EyeOff,
-  CheckCircle2,
-  Circle,
   AlertCircleIcon,
 } from "lucide-react";
 
@@ -75,17 +72,6 @@ export function NavUser({
   const [passwordError, setPasswordError] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const passwordRequirements = [
-    { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
-    { label: "Uppercase letter (A-Z)", test: (v: string) => /[A-Z]/.test(v) },
-    { label: "Lowercase letter (a-z)", test: (v: string) => /[a-z]/.test(v) },
-    { label: "Number (0-9)", test: (v: string) => /[0-9]/.test(v) },
-    {
-      label: "Special character (!@#$%^&*...)",
-      test: (v: string) => /[^A-Za-z0-9]/.test(v),
-    },
-  ];
-
   function handleOpenChangePassword() {
     setCurrentPassword("");
     setNewPassword("");
@@ -98,26 +84,16 @@ export function NavUser({
   }
 
   async function handleChangePassword() {
-    // Validate current password
     if (!currentPassword) {
       setPasswordError("Current password is required");
       return;
     }
 
-    // Validate new password requirements
-    const allPassed = passwordRequirements.every((r) => r.test(newPassword));
-    if (!allPassed) {
-      setPasswordError("New password does not meet all requirements");
-      return;
-    }
-
-    // Validate confirm password
     if (newPassword !== confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
     }
 
-    // Validate not same as current
     if (currentPassword === newPassword) {
       setPasswordError("New password must be different from current password");
       return;
@@ -146,19 +122,6 @@ export function NavUser({
       setIsChangingPassword(false);
     }
   }
-
-  const passedCount = passwordRequirements.filter((r) =>
-    r.test(newPassword)
-  ).length;
-  const totalReqs = passwordRequirements.length;
-
-  const getBarColor = () => {
-    if (passedCount === 0) return "bg-muted";
-    if (passedCount <= 2) return "bg-destructive";
-    if (passedCount <= 3) return "bg-amber-500";
-    if (passedCount <= 4) return "bg-yellow-500";
-    return "bg-emerald-500";
-  };
 
   async function logOutUser() {
     await authClient.signOut();
@@ -207,7 +170,7 @@ export function NavUser({
   const { isMobile } = useSidebar();
   return (
     <>
-      <SidebarMenu>
+      <SidebarMenu className="">
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -224,9 +187,9 @@ export function NavUser({
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate text-xs text-sidebar-foreground/70">{user.email}</span>
               </div>
-              <EllipsisVertical></EllipsisVertical>
+              <EllipsisVertical className="text-sidebar-foreground/70"></EllipsisVertical>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               className="min-w-56 rounded-2xl"
@@ -245,7 +208,7 @@ export function NavUser({
                       <AvatarFallback>{user.name.slice(0, 1)}</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">{user.name}</span>
+                      <span className="truncate font-medium text-white">{user.name}</span>
                       <span className="truncate text-xs">{user.email}</span>
                     </div>
                   </div>
@@ -362,7 +325,7 @@ export function NavUser({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             {passwordError && (
               <div className="flex items-center gap-2 p-3 text-[13px] font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
                 <AlertCircleIcon size={16} />
@@ -370,7 +333,7 @@ export function NavUser({
               </div>
             )}
 
-            <Field className="flex flex-col gap-2">
+            <Field className="flex flex-col gap-4 mb-8">
               <Label htmlFor="current-password">Current Password</Label>
               <InputGroup className="h-10">
                 <InputGroupInput
@@ -398,7 +361,7 @@ export function NavUser({
               </InputGroup>
             </Field>
 
-            <Field className="flex flex-col gap-2">
+            <Field className="flex flex-col gap-4">
               <Label htmlFor="new-password">New Password</Label>
               <InputGroup className="h-10">
                 <InputGroupInput
@@ -424,47 +387,9 @@ export function NavUser({
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-
-              {/* Password strength bar */}
-              <div className="flex flex-col gap-2.5 mt-0.5">
-                <div className="flex gap-1">
-                  {Array.from({ length: totalReqs }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "h-1 flex-1 rounded-full transition-colors duration-300",
-                        i < passedCount ? getBarColor() : "bg-muted"
-                      )}
-                    />
-                  ))}
-                </div>
-                <ul className="flex flex-col gap-1">
-                  {passwordRequirements.map((req) => {
-                    const passed = req.test(newPassword);
-                    return (
-                      <li
-                        key={req.label}
-                        className={cn(
-                          "flex items-center gap-2 text-xs transition-colors duration-200",
-                          passed
-                            ? "text-emerald-500"
-                            : "text-muted-foreground"
-                        )}
-                      >
-                        {passed ? (
-                          <CheckCircle2 className="size-3" />
-                        ) : (
-                          <Circle className="size-3" />
-                        )}
-                        {req.label}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
             </Field>
 
-            <Field className="flex flex-col gap-2">
+            <Field className="flex flex-col gap-4">
               <Label htmlFor="confirm-new-password">Confirm New Password</Label>
               <InputGroup className="h-10">
                 <InputGroupInput

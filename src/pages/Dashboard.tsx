@@ -57,25 +57,11 @@ export default function HomePage() {
       <SidebarInset>
         {!isEditorRoute && (
           <>
+            <div className="">
+              <p className="p-5 text-4xl font-medium font-lastik">{title}</p>
+            </div>
             <header className="flex h-16 shrink-0 items-center justify-between gap-2 -my-1">
-              <div className="flex items-center gap-2 px-4">
-                <SidebarTrigger className="-ml-1" />
-                <Separator
-                  orientation="vertical"
-                  className="mr-2 data-[orientation=vertical]:h-4 data-[orientation=vertical]:self-center"
-                />
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>{title}</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-                <div className="ml-3">
+              <div className="flex items-center gap-2 px-4">                
                   <InputGroup className="h-8 has-[[data-slot=input-group-control]:focus-visible]:ring-0">
                     <InputGroupInput
                       value={inputValue}
@@ -86,7 +72,6 @@ export default function HomePage() {
                       <SearchIcon />
                     </InputGroupAddon>
                   </InputGroup>
-                </div>
               </div>
               <div className="pr-4">
                 <Tabs
@@ -94,14 +79,12 @@ export default function HomePage() {
                   value={viewType}
                   onValueChange={(val) => setViewType(val)}
                 >
-                  <TabsList className="rounded-2xl">
-                    <TabsTrigger value="cards">
+                  <TabsList className="rounded-[8px]">
+                    <TabsTrigger value="cards" className={"rounded-[6px] border-0 shadow-xs dark:data-active:bg-black"}>
                       <HugeiconsIcon icon={WindowsNewIcon} />
-                      {/* <span className="text-xs">Cards</span> */}
                     </TabsTrigger>
-                    <TabsTrigger value="list">
+                    <TabsTrigger value="list" className={"rounded-[6px] border-0 shadow-xs dark:data-active:bg-black"}>
                       <HugeiconsIcon icon={LeftToRightListBulletIcon} />
-                      {/* <span className="text-xs">List</span> */}
                     </TabsTrigger>
                     <TabsContent value="cards"></TabsContent>
                     <TabsContent value="list"></TabsContent>
@@ -109,7 +92,6 @@ export default function HomePage() {
                 </Tabs>
               </div>
             </header>
-            <Separator />
           </>
         )}
         <Outlet context={{viewType, searchQuery}} />

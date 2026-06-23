@@ -151,11 +151,12 @@ export function NavWorkspaces({ workspaces }: { workspaces: Workspace[] }) {
         {workspaces.map((item) => (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton
+              className="text-sidebar-foreground/70"
               isActive={item.id == workspace_id}
               onClick={() => navigate(`/dashboard/workspace/${item.id}`)}
             >
               <span
-                className="size-1.5 rounded-full"
+                className="size-1.75 rounded-full"
                 style={{ backgroundColor: item.color }}
               />
               <span>{item.name}</span>

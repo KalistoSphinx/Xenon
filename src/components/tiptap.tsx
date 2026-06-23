@@ -128,6 +128,11 @@ const Tiptap = ({
           : item,
       );
     });
+
+    queryClient.setQueryData(["notes", noteId], (old: any) => {
+      if (!old) return old;
+      return { ...old, workspaces: workspaceData ?? {} };
+    });
   };
 
   const handleWorkspaceSelect = (workspace: Workspace) => {

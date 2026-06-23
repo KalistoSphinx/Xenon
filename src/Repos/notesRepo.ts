@@ -49,13 +49,14 @@ export const useUpdateNote = () =>
       const previousNotes = context.client.getQueryData(["notes"]);
       const previousNote = context.client.getQueryData(["notes", noteId]);
 
-      context.client.setQueryData(["notes"], (old: any) =>
-        old.map((item: any) =>
+      context.client.setQueryData(["notes"], (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((item: any) =>
           item.notes.id == noteId
             ? { ...item, notes: { ...item.notes, ...value } }
             : item,
-        ),
-      );
+        );
+      });
 
       context.client.setQueryData(["notes", noteId], (old: any) => {
         if (!old) return old;

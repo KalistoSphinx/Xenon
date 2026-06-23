@@ -27,6 +27,7 @@ export function StarredNotes() {
       const res = await api.get("/note");
       return res.data;
     },
+    staleTime: 2000,
   });
 
   const filteredNotes = useMemo(() => {

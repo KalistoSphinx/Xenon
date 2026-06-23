@@ -2,7 +2,7 @@ import Tiptap from "@/components/tiptap";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { useUpdateNote } from "@/Repos/notesRepo";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useEffect, useMemo, useRef } from "react";
@@ -11,9 +11,11 @@ import { useNavigate, useParams } from "react-router";
 export function EditorPage() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const updateNote = useUpdateNote();
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const titleRef = useRef("");
   const contentRef = useRef<any>(null);
   const isDirtyRef = useRef(false);
   const loadedIdRef = useRef<string | undefined>(undefined);
@@ -33,16 +35,40 @@ export function EditorPage() {
     if (loadedIdRef.current !== id) {
       loadedIdRef.current = id;
       isDirtyRef.current = false;
+      titleRef.current = note.title ?? "";
       contentRef.current = note.content ?? null;
     }
   }, [note, id]);
 
+  const flushToCache = () => {
+    if (!isDirtyRef.current) return;
+    const value = { title: titleRef.current, content: contentRef.current };
+
+    queryClient.setQueryData(["notes"], (old: any) => {
+      if (!Array.isArray(old)) return old;
+      return old.map((item: any) =>
+        item.notes.id === id
+          ? { ...item, notes: { ...item.notes, ...value } }
+          : item,
+      );
+    });
+
+    queryClient.setQueryData(["notes", id], (old: any) => {
+      if (!old) return old;
+      if (old.notes) {
+        return { ...old, notes: { ...old.notes, ...value } };
+      }
+      return { ...old, ...value };
+    });
+  };
+
   const saveNow = () => {
     if (!isDirtyRef.current) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
+    flushToCache();
     updateNote.mutate({
       id: id as string,
-      value: { content: contentRef.current },
+      value: { title: titleRef.current, content: contentRef.current },
     });
     isDirtyRef.current = false;
   };
@@ -58,6 +84,12 @@ export function EditorPage() {
       saveNow();
     };
   }, [id]);
+
+  const handleTitleChange = (newTitle: string) => {
+    titleRef.current = newTitle;
+    isDirtyRef.current = true;
+    scheduleSave();
+  };
 
   const handleContentUpdate = (newContent: any) => {
     contentRef.current = newContent;
@@ -130,6 +162,7 @@ export function EditorPage() {
               initialTitle={note.title ?? ""}
               initialContent={note.content ?? null}
               initialWorkspace={data?.workspaces?.id ? data.workspaces : null}
+              onTitleChange={handleTitleChange}
               onContentUpdate={handleContentUpdate}
               onBlur={saveNow}
             />

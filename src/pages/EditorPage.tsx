@@ -14,7 +14,6 @@ export function EditorPage() {
   const updateNote = useUpdateNote();
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const titleRef = useRef("");
   const contentRef = useRef<any>(null);
   const isDirtyRef = useRef(false);
   const loadedIdRef = useRef<string | undefined>(undefined);
